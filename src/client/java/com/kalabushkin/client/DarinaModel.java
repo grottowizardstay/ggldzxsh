@@ -22,10 +22,12 @@ public class DarinaModel extends SinglePartEntityModel<DarinaEntity> {
 
 	private final ModelPart root;
 	private final ModelPart head;
+	private final ModelPart[] hair;
 
 	public DarinaModel(ModelPart root) {
 		this.root = root;
 		this.head = root.getChild("waist").getChild("head");
+		this.hair = new ModelPart[] {head.getChild("hair_back"), head.getChild("hair_front_right"), head.getChild("hair_front_left")};
 	}
 
 	public static TexturedModelData getTexturedModelData() {
@@ -49,21 +51,21 @@ public class DarinaModel extends SinglePartEntityModel<DarinaEntity> {
 						.uv(36, 0).cuboid(-4.5f, -6.0f, -9.0f, 9.0f, 9.0f, 9.0f, new Dilation(0.4f))
 						.uv(72, 10).cuboid(-4.5f, -3.5f, -9.7f, 9.0f, 3.0f, 1.0f)
 						// Back of the throat: inside the jaw while the mouth is shut, the far wall of it when open.
-						.uv(72, 14).cuboid(-4.5f, 0.0f, -1.5f, 9.0f, 4.0f, 1.0f),
+						.uv(72, 14).cuboid(-4.5f, 0.0f, -1.5f, 9.0f, 3.0f, 1.0f),
 				ModelTransform.pivot(0.0f, -3.0f, 4.5f));
 		head.addChild("jaw",
 				ModelPartBuilder.create().uv(0, 15).cuboid(-4.5f, 0.0f, -9.0f, 9.0f, 3.0f, 9.0f),
 				ModelTransform.pivot(0.0f, -3.0f, 4.5f));
-		// Each length of hair hangs from a pivot at its top edge so it can swing.
-		waist.addChild("hair_back",
+		// Each length of hair hangs from the head, from a pivot at its top edge so it can swing.
+		head.addChild("hair_back",
 				ModelPartBuilder.create().uv(100, 0).cuboid(-4.5f, 0.0f, 0.0f, 9.0f, 14.0f, 1.0f),
-				ModelTransform.pivot(0.0f, -21.0f, 4.9f));
-		waist.addChild("hair_front_right",
+				ModelTransform.pivot(0.0f, -7.0f, 4.9f));
+		head.addChild("hair_front_right",
 				ModelPartBuilder.create().uv(120, 0).cuboid(-1.0f, 0.0f, -1.0f, 2.0f, 11.0f, 1.0f),
-				ModelTransform.pivot(-5.0f, -19.0f, -4.6f));
-		waist.addChild("hair_front_left",
+				ModelTransform.pivot(-5.0f, -5.0f, -4.6f));
+		head.addChild("hair_front_left",
 				ModelPartBuilder.create().uv(120, 12).cuboid(-1.0f, 0.0f, -1.0f, 2.0f, 11.0f, 1.0f),
-				ModelTransform.pivot(5.0f, -19.0f, -4.6f));
+				ModelTransform.pivot(5.0f, -5.0f, -4.6f));
 		waist.addChild("right_arm",
 				ModelPartBuilder.create().uv(88, 27).cuboid(-3.5f, -2.0f, -2.5f, 5.0f, 14.0f, 5.0f),
 				ModelTransform.pivot(-9.0f, -12.0f, 0.0f));
@@ -95,5 +97,14 @@ public class DarinaModel extends SinglePartEntityModel<DarinaEntity> {
 		updateAnimation(entity.hungryAnimationState, DarinaAnimations.HUNGRY, animationProgress, 1.0f);
 		updateAnimation(entity.munchAnimationState, DarinaAnimations.MUNCH, animationProgress, 1.0f);
 		updateAnimation(entity.eatAnimationState, DarinaAnimations.EAT, animationProgress, 1.0f);
+		hangHair();
+	}
+
+	/** The hair turns with the head but keeps hanging down when the head nods or tilts. */
+	public void hangHair() {
+		for (ModelPart lock : hair) {
+			lock.pitch -= head.pitch;
+			lock.roll -= head.roll;
+		}
 	}
 }

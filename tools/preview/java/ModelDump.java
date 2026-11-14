@@ -71,6 +71,10 @@ public final class ModelDump {
 			rita.getPart().traverse().forEach(ModelPart::resetTransform);
 			animate(rita, CoupleAnimations.WALK, 250L, 1.0f);
 			dump("walk", rita);
+			rita.getPart().traverse().forEach(ModelPart::resetTransform);
+			rita.getPart().getChild("waist").getChild("head").yaw = 50.0f * (float) Math.PI / 180.0f;
+			rita.hangHair();
+			dump("look50", rita);
 			long[] listenTimes = {1100L, 2600L};
 			for (long time : listenTimes) {
 				rita.getPart().traverse().forEach(ModelPart::resetTransform);
@@ -87,6 +91,14 @@ public final class ModelDump {
 			darina.getPart().traverse().forEach(ModelPart::resetTransform);
 			animate(darina, DarinaAnimations.WADDLE, 300L, 1.0f);
 			dump("waddle", darina);
+			for (float[] look : new float[][] {{50.0f, 0.0f}, {-50.0f, 25.0f}, {0.0f, -35.0f}}) {
+				darina.getPart().traverse().forEach(ModelPart::resetTransform);
+				ModelPart head = darina.getPart().getChild("waist").getChild("head");
+				head.yaw = look[0] * (float) Math.PI / 180.0f;
+				head.pitch = look[1] * (float) Math.PI / 180.0f;
+				darina.hangHair();
+				dump("look" + (int) look[0] + "_" + (int) look[1], darina);
+			}
 			darina.getPart().traverse().forEach(ModelPart::resetTransform);
 			animate(darina, DarinaAnimations.HUNGRY, 400L, 1.0f);
 			dump("hungry", darina);

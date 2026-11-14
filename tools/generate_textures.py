@@ -1136,7 +1136,7 @@ def darina():
     c.grid(jaw["front"], DARINA_JAW, DARINA_FACE_PALETTE)
     c.paint(jaw["top"], mouth(lambda x, y: (214, 104, 116) if (x - 8.5) ** 2 / 20 + (y - 8) ** 2 / 34 < 1 else MOUTH), 3)
 
-    c.paint_box(c.box(72, 14, 9, 4, 1), lambda x, y: (60, 10, 18) if 5 <= x <= 12 and y > 2 else MOUTH, 3)
+    c.paint_box(c.box(72, 14, 9, 3, 1), lambda x, y: (60, 10, 18) if 5 <= x <= 12 and y > 1 else MOUTH, 3)
 
     # Outer layer: hair all round, open at the front apart from the hairline and the edges of the face.
     hair = c.box(36, 0, 9, 9, 9)

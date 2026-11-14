@@ -24,10 +24,12 @@ public class RitaModel extends SinglePartEntityModel<RitaEntity> {
 
 	private final ModelPart root;
 	private final ModelPart head;
+	private final ModelPart[] hair;
 
 	public RitaModel(ModelPart root) {
 		this.root = root;
 		this.head = root.getChild("waist").getChild("head");
+		this.hair = new ModelPart[] {head.getChild("hair_back"), head.getChild("hair_front_right"), head.getChild("hair_front_left")};
 	}
 
 	public static TexturedModelData getTexturedModelData() {
@@ -39,21 +41,21 @@ public class RitaModel extends SinglePartEntityModel<RitaEntity> {
 						.uv(16, 16).cuboid(-4.0f, -12.0f, -2.0f, 8.0f, 12.0f, 4.0f)
 						.uv(36, 32).cuboid(-4.0f, -12.0f, -2.0f, 8.0f, 7.0f, 4.0f, new Dilation(0.3f)),
 				ModelTransform.NONE);
-		waist.addChild("head",
+		ModelPartData head = waist.addChild("head",
 				ModelPartBuilder.create()
 						.uv(0, 0).cuboid(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f)
 						.uv(32, 0).cuboid(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f, new Dilation(0.3f)),
 				ModelTransform.pivot(0.0f, -12.0f, 0.0f));
-		// Each lock hangs from a pivot at its top edge so it can swing.
-		waist.addChild("hair_back",
+		// Each lock hangs from the head, from a pivot at its top edge so it can swing.
+		head.addChild("hair_back",
 				ModelPartBuilder.create().uv(0, 32).cuboid(-4.0f, 0.0f, 0.0f, 8.0f, 9.0f, 1.0f),
-				ModelTransform.pivot(0.0f, -12.0f, 2.4f));
-		waist.addChild("hair_front_right",
+				ModelTransform.pivot(0.0f, 0.0f, 2.4f));
+		head.addChild("hair_front_right",
 				ModelPartBuilder.create().uv(20, 32).cuboid(-1.0f, 0.0f, -1.0f, 2.0f, 7.0f, 1.0f),
-				ModelTransform.pivot(-3.0f, -12.0f, -2.4f));
-		waist.addChild("hair_front_left",
+				ModelTransform.pivot(-3.0f, 0.0f, -2.4f));
+		head.addChild("hair_front_left",
 				ModelPartBuilder.create().uv(28, 32).cuboid(-1.0f, 0.0f, -1.0f, 2.0f, 7.0f, 1.0f),
-				ModelTransform.pivot(3.0f, -12.0f, -2.4f));
+				ModelTransform.pivot(3.0f, 0.0f, -2.4f));
 		waist.addChild("right_arm",
 				ModelPartBuilder.create().uv(40, 16).cuboid(-2.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f),
 				ModelTransform.pivot(-5.0f, -10.0f, 0.0f));
@@ -83,5 +85,14 @@ public class RitaModel extends SinglePartEntityModel<RitaEntity> {
 		animateMovement(CoupleAnimations.WALK, limbAngle, limbDistance, 2.0f, 2.5f);
 		updateAnimation(entity.idleAnimationState, CoupleAnimations.RITA_IDLE, animationProgress, 1.0f);
 		updateAnimation(entity.listenAnimationState, CoupleAnimations.LISTEN, animationProgress, 1.0f);
+		hangHair();
+	}
+
+	/** The hair turns with the head but keeps hanging down when the head nods or tilts. */
+	public void hangHair() {
+		for (ModelPart lock : hair) {
+			lock.pitch -= head.pitch;
+			lock.roll -= head.roll;
+		}
 	}
 }
