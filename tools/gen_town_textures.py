@@ -377,191 +377,191 @@ bus.panel(DOOR['east'], door_inside)
 bus.grain(2.2)
 bus.save('entity/marshrutka')
 # ================================================================ Romich (64x64 model px)
-SKIN = (224, 172, 138, 255)
-SKIN_D = (198, 144, 112, 255)
-HAIR = (152, 114, 76, 255)
-HAIR_D = (120, 86, 56, 255)
-BEARD = (126, 90, 60, 255)
+# Drawn texel by texel at two texels per model pixel, like the base mod's own characters.
+SKIN = (226, 178, 148, 255)
+SKIN_S = (210, 160, 130, 255)
+SKIN_D = (188, 138, 110, 255)
+HAIR = (98, 72, 52, 255)
+HAIR_D = (76, 55, 40, 255)
+FADE = (158, 124, 100, 255)
+BEARD = (94, 68, 50, 255)
+BEARD_D = (74, 53, 39, 255)
+STUBBLE = (156, 118, 94, 255)
+BROW = (56, 40, 30, 255)
+EYE = (240, 240, 240, 255)
+IRIS = (92, 116, 138, 255)
+LIP = (176, 106, 98, 255)
+BUD = (246, 246, 246, 255)
 TEE = (124, 142, 166, 255)
-TEE_D = (98, 114, 140, 255)
+TEE_D = (100, 116, 142, 255)
 NAVY = (42, 52, 82, 255)
 SHORTS = (56, 60, 72, 255)
 SHORTS_D = (40, 43, 54, 255)
 FRAME = (26, 26, 30, 255)
-LENS = (58, 60, 92, 255)
+INK = {'H': HAIR, 'h': HAIR_D, 'f': FADE, '.': SKIN, 's': SKIN_S, 'd': SKIN_D, 'B': BROW, 'W': EYE,
+       'I': IRIS, 'M': BEARD, 'k': BEARD_D, 'm': STUBBLE, 'L': LIP, 'E': BUD, 'T': TEE, 't': TEE_D, 'N': NAVY}
 
-man = Atlas(64, 64, 8)
+man = Atlas(64, 64, 2)
 HEAD = faces(0, 0, 8, 8, 8)
-HAT = faces(32, 0, 8, 8, 8)
 BODY = faces(16, 16, 8, 12, 4)
 ARM = faces(40, 16, 4, 12, 4)
 LEG = faces(0, 16, 4, 12, 4)
-SPECS = faces(0, 32, 9, 2, 1)
-CHIN = faces(24, 32, 8, 3, 4)
 SHIRT = faces(32, 40, 8, 12, 4)
 SLEEVE = faces(0, 44, 4, 5, 4)
 TRUNKS = faces(16, 44, 4, 6, 4)
 
 
-def strands(p, w, h, top):
-    """Hair combed forward and to one side."""
-    p.rect(0, 0, w, h, HAIR)
-    for i in range(26):
-        x = rng.uniform(0, w)
-        y = rng.uniform(0, h)
-        dx, dy = (rng.uniform(0.4, 1.4), rng.uniform(1.0, 2.4)) if top else (rng.uniform(-0.2, 0.2), rng.uniform(1.0, 2.6))
-        shade = HAIR_D if i % 3 else (176, 138, 96, 255)
-        p.line([(x, y), (x + dx, y + dy)], shade, 0.18)
+def stamp(rect, rows, flip=False):
+    """Copies rows of INK letters onto a face, one letter per texel."""
+    x, y, w, h = rect
+    s = man.s
+    assert len(rows) == h * s and all(len(row) == w * s for row in rows), rect
+    for j, row in enumerate(rows):
+        for i, letter in enumerate(row[::-1] if flip else row):
+            man.image.putpixel((x * s + i, y * s + j), INK[letter])
 
 
-def face(p, w, h):
-    p.rect(0, 0, w, h, SKIN)
-    p.rect(0, 0, w, 1.2, HAIR)                           # hairline under the fringe
-    p.rect(0, 3.0, 0.9, h, BEARD)                        # sideburns into the beard
-    p.rect(w - 0.9, 3.0, w, h, BEARD)
-    p.rect(0, 5.9, w, h, BEARD)
-    p.rect(1.5, 2.4, 3.6, 2.8, HAIR_D)                   # brows
-    p.rect(4.4, 2.4, 6.5, 2.8, HAIR_D)
-    p.rect(1.2, 3.0, 3.7, 4.3, FRAME)                    # the glasses' shadow on the face
-    p.rect(4.3, 3.0, 6.8, 4.3, FRAME)
-    p.rect(3.6, 3.6, 4.4, 5.0, SKIN_D)                   # nose
-    p.rect(2.4, 5.1, 5.6, 5.6, BEARD)                    # moustache
-    p.rect(3.0, 6.0, 5.0, 6.5, (176, 110, 96, 255))      # mouth
+CROP = ['HHhHHHHhHHHHhHHH', 'HhHHHhHHHHhHHHhH', 'HHHhHHHHhHHHHhHH', 'HHhHHHhHHHHhHHHh']
 
+# Short crop, heavy brows, pale eyes, a moustache joined to a trimmed beard along the jaw.
+FACE = CROP[:3] + [
+    'HHff........ffHH',
+    'Hf............fH',
+    'f.BBBBB..BBBBB.f',
+    'f.sssss..sssss.f',
+    'M.sWII.dd.IIWs.M',
+    'M......dd......M',
+    'M.s...dddd...s.M',
+    'Mm...MMMMMM...mM',
+    'MMm.MMLLLLMM.mMM',
+    'MMMmMMMmmMMMmMMM',
+    'MMMMkMMMMMMkMMMM',
+    'MkMMMMMkMMMMMMkM',
+    'kMMkMMMMMkMMkMMk',
+]
 
-def head_side(p, w, h):
-    """Front of the head on the left."""
-    p.rect(0, 0, w, h, SKIN)
-    p.rect(0, 0, w, 3.2, HAIR)
-    p.rect(3.5, 3.2, w, 5.2, HAIR)                       # hair over the back of the ear
-    p.rect(0, 3.0, 1.6, h, BEARD)
-    p.polygon([(0, 5.6), (4.5, 6.4), (4.5, h), (0, h)], BEARD)
-    p.rect(3.2, 3.6, 4.6, 5.4, SKIN_D)                   # ear
+# The front of the head is at the left edge.
+SIDE = CROP + [
+    'fffHfffHfffHfffH',
+    'f.ffffffffffffff',
+    'f.....fssfffffff',
+    'M.....sdds.fffff',
+    'M.....sdds......',
+    'MM.....ss.......',
+    'MMM.............',
+    'MMMMm...........',
+    'MMMMMMm.........',
+    'MMMMMMMMm.......',
+    'MkMMMMMMMm......',
+    'kMMkMMMMMMs....s',
+]
+# His right ear has a white earbud in it.
+SIDE_BUD = SIDE[:7] + ['M.....sEEs.fffff', 'M.....sdEs......'] + SIDE[9:]
 
+BACK = CROP + [
+    'HhHHHHHhHHhHHHHH',
+    'HHHhHHHHHHHHhHHH',
+    'fHfHfHfHfHfHfHfH',
+    'ffffffffffffffff',
+    'ffffffffffffffff',
+    '.ffffffffffffff.',
+    '..ffffffffffff..',
+    '...ssssssssss...',
+    '................',
+    '................',
+    's..............s',
+    'ss............ss',
+]
 
-def hair_front(p, w, h):
-    p.polygon([(0, 0), (w, 0), (w, 1.5), (5, 2.0), (2, 2.7), (0, 2.9)], HAIR)
-    for x in np.arange(0.4, w, 0.7):
-        p.line([(x, 0), (x - 0.5, 1.6)], HAIR_D, 0.15)
-
-
-def hair_side(p, w, h):
-    p.polygon([(0, 0), (w, 0), (w, 5.6), (4, 5.2), (2.5, 3.6), (0, 3.2)], HAIR)
-    for x in np.arange(0.5, w, 0.8):
-        p.line([(x, 0.3), (x + 0.4, 3.0)], HAIR_D, 0.15)
-
-
-def lenses(p, w, h):
-    p.rect(0, 0, w, h, FRAME)
-    for x0 in (0.4, 5.0):
-        p.rect(x0, 0.3, x0 + 3.6, h - 0.3, LENS)
-        p.polygon([(x0 + 0.5, 0.3), (x0 + 1.6, 0.3), (x0 + 0.9, h - 0.3), (x0, h - 0.3)], (104, 108, 150, 255))
-    p.rect(4.0, 0, 5.0, 0.5, FRAME)
-
-
-def chin_front(p, w, h):
-    p.rect(0, 0, w, h, BEARD)
-    p.rect(2.7, 0, 5.3, 1.1, CLEAR)                      # leaves the mouth showing
-    for x in np.arange(0.3, w, 0.45):
-        p.line([(x, rng.uniform(0, 1.5)), (x + 0.1, h)], (104, 72, 46, 255), 0.12)
-
-
-def chin_side(p, w, h):
-    """Front on the left: the beard fades out towards the ear."""
-    p.polygon([(0, 0), (2.2, 0.4), (3.6, 1.8), (2.6, h), (0, h)], BEARD)
-
-
-def shirt_front(p, w, h):
-    p.rect(0, 0, w, h, TEE)
-    p.ellipse(2.2, -1.6, 5.8, 1.3, TEE_D)                # ribbed collar
-    p.ellipse(2.7, -1.6, 5.3, 0.7, SKIN)
-    p.text(w / 2, 3.6, 'ROCK STAR', 1.25, NAVY)
-    p.rect(1.4, 4.6, 6.6, 4.75, NAVY)
-    p.text(w / 2, 5.5, 'RECORDS', 0.95, NAVY)
-    # A rough emblem under the lettering: a fist with horns.
-    p.polygon([(3.0, 9.6), (3.0, 7.6), (3.4, 6.5), (3.8, 7.6), (4.3, 7.6), (4.3, 7.2), (4.8, 7.2), (4.8, 7.6),
-               (5.2, 6.5), (5.5, 7.7), (5.3, 9.6), (4.6, 10.4), (3.6, 10.4)], NAVY)
-    p.line([(3.3, 8.4), (5.2, 8.4)], TEE, 0.12)
-    p.rect(0, h - 0.5, w, h, TEE_D)                      # hem
-
-
-def shirt_plain(p, w, h):
-    p.rect(0, 0, w, h, TEE)
-    p.rect(0, h - 0.5, w, h, TEE_D)
-
-
-def shirt_back(p, w, h):
-    shirt_plain(p, w, h)
-    p.ellipse(2.4, -1.2, 5.6, 0.8, TEE_D)
-
-
-def shirt_top(p, w, h):
-    p.rect(0, 0, w, h, TEE)
-    p.ellipse(1.8, 0.2, 6.2, 3.8, TEE_D)
-    p.ellipse(2.3, 0.6, 5.7, 3.4, CLEAR)                 # neck hole
+PLAIN = 'T' * 16
+# The print: two lines of lettering over a fist with raised horns.
+TEE_FRONT = [
+    'TTTTTt....tTTTTT',
+    'TTTTTTt..tTTTTTT',
+    'TTTTTTTttTTTTTTT',
+    PLAIN,
+    PLAIN,
+    'TNNTNNNTTNNNTNNT',
+    'TNNTNTNTTNTNTNNT',
+    'TNNTNNNTTNNNTNNT',
+    PLAIN,
+    'TTTNNTNNNNTNNTTT',
+    PLAIN,
+    'TTTTTNTNNTNTTTTT',
+    'TTTTTNTNNTNTTTTT',
+    'TTTTTNNNNNNTTTTT',
+    'TTTTTTNNNNTTTTTT',
+    'TTTTTTNNNNTTTTTT',
+    'TTTTTTTNNTTTTTTT',
+    PLAIN,
+    'TTtTTTTTTTTTTtTT',
+    PLAIN,
+    PLAIN,
+    'TTTTTTtTTTTTTTTT',
+    PLAIN,
+    't' * 16,
+]
+TEE_BACK = ['TTTTTttttttTTTTT'] + [PLAIN] * 9 + ['TTTtTTTTTTTTtTTT'] + [PLAIN] * 12 + ['t' * 16]
+TEE_SIDE = ['T' * 8] * 23 + ['t' * 8]
 
 
 def limb(color_top, rows, foot):
     def paint(p, w, h):
         p.rect(0, 0, w, h, SKIN)
-        p.rect(0, 0, 0.5, h, SKIN_D)
-        p.rect(w - 0.5, 0, w, h, SKIN_D)
+        p.rect(0, 0, 0.5, h, SKIN_S)
+        p.rect(w - 0.5, 0, w, h, SKIN_S)
         p.rect(0, 0, w, rows, color_top)
         if foot:
-            p.rect(0, h - 1.1, w, h, FRAME)              # the sole of a slide
-            p.rect(0, h - 2.6, w, h - 1.9, FRAME)        # and its strap
+            p.rect(0, h - 1, w, h, FRAME)                # the sole of a slide
+            p.rect(0, h - 2.5, w, h - 2, FRAME)          # and its strap
     return paint
+
+
+def sleeve(p, w, h):
+    p.rect(0, 0, w, h, TEE)
+    p.rect(0, h - 0.5, w, h, TEE_D)
 
 
 def shorts_side(p, w, h):
     p.rect(0, 0, w, h, SHORTS)
-    p.rect(0, h - 0.6, w, h, SHORTS_D)
-    p.line([(w / 2, 0), (w / 2, h)], SHORTS_D, 0.12)
-    p.rect(0, 0, w, 0.7, SHORTS_D)                       # waistband
+    p.rect(0, 0, w, 0.5, SHORTS_D)                       # waistband
+    p.rect(0, h - 0.5, w, h, SHORTS_D)
+    p.rect(w / 2, 0.5, w / 2 + 0.5, h - 0.5, SHORTS_D)   # side seam
 
 
-man.fill((0, 0, 32, 16), SKIN)
-man.panel(HEAD['top'], lambda p, w, h: strands(p, w, h, True))
-man.panel(HEAD['south'], lambda p, w, h: strands(p, w, h, False))
-man.panel(HEAD['north'], face)
-man.panel(HEAD['west'], head_side, flip=True)
-man.panel(HEAD['east'], head_side)
-man.panel(HAT['top'], lambda p, w, h: strands(p, w, h, True))
-man.panel(HAT['south'], lambda p, w, h: (strands(p, w, h, False), p.rect(0, 6.6, w, h, CLEAR)))
-man.panel(HAT['north'], hair_front)
-man.panel(HAT['west'], hair_side, flip=True)
-man.panel(HAT['east'], hair_side)
+def shirt_top(p, w, h):
+    p.rect(0, 0, w, h, TEE)
+    p.rect(2.5, 0.5, 5.5, 3.5, SKIN_S)                   # the neck
+
+
+stamp(HEAD['top'], CROP * 4)
+stamp(HEAD['north'], FACE)
+stamp(HEAD['east'], SIDE)
+stamp(HEAD['west'], SIDE_BUD, flip=True)
+stamp(HEAD['south'], BACK)
+man.fill(HEAD['bottom'], BEARD)
 
 man.fill((16, 16, 24, 16), TEE)
 man.fill((40, 16, 16, 16), SKIN)
+man.fill((0, 16, 16, 16), SKIN)
 for side in ('north', 'south', 'west', 'east'):
     man.panel(ARM[side], limb(TEE, 4.5, False))
     man.panel(LEG[side], limb(SHORTS, 6.0, True))
-    man.panel(SLEEVE[side], shirt_plain)
+    man.panel(SLEEVE[side], sleeve)
     man.panel(TRUNKS[side], shorts_side)
 man.fill(ARM['top'], TEE)
-man.fill(ARM['bottom'], SKIN_D)
+man.fill(ARM['bottom'], SKIN_S)
 man.fill(LEG['top'], SHORTS)
 man.fill(LEG['bottom'], FRAME)
 man.fill(SLEEVE['top'], TEE)
 man.fill(TRUNKS['top'], SHORTS)
 
-man.fill((0, 32, 20, 3), FRAME)
-man.panel(SPECS['north'], lenses)
-man.fill((0, 36, 10, 5), FRAME)
-man.panel(CHIN['north'], chin_front)
-man.panel(CHIN['west'], chin_side, flip=True)
-man.panel(CHIN['east'], chin_side)
-man.fill(CHIN['bottom'], BEARD)
-
-man.panel(SHIRT['north'], shirt_front)
-man.panel(SHIRT['south'], shirt_back)
-man.panel(SHIRT['west'], shirt_plain)
-man.panel(SHIRT['east'], shirt_plain)
+stamp(SHIRT['north'], TEE_FRONT)
+stamp(SHIRT['south'], TEE_BACK)
+stamp(SHIRT['west'], TEE_SIDE)
+stamp(SHIRT['east'], TEE_SIDE)
 man.panel(SHIRT['top'], shirt_top)
-for area in ((32, 40, 24, 16), (0, 44, 16, 9), (16, 16, 24, 16)):
-    man.mottle(area, 7, 5)                               # acid-washed cotton
-man.grain(2.5)
+man.grain(2.2)
 man.save('entity/romich')
 
 

@@ -14,8 +14,8 @@ import net.minecraft.client.render.entity.model.EntityModelPartNames;
 import net.minecraft.util.math.MathHelper;
 
 /**
- * A human figure with its own parts on top: sunglasses, a beard, a loose T-shirt with short
- * sleeves, and shorts. The texture is 64x64; rows 32 and below hold the extra parts.
+ * A human figure with its own parts on top: a loose T-shirt with short sleeves, and shorts.
+ * The texture is 64x64 model pixels; rows 40 and below hold the extra parts.
  */
 public class RomichModel extends BipedEntityModel<RomichEntity> {
 	public RomichModel(ModelPart root) {
@@ -25,14 +25,6 @@ public class RomichModel extends BipedEntityModel<RomichEntity> {
 	public static TexturedModelData createModelData() {
 		ModelData data = BipedEntityModel.getModelData(Dilation.NONE, 0.0f);
 		ModelPartData root = data.getRoot();
-
-		ModelPartData head = root.getChild(EntityModelPartNames.HEAD);
-		head.addChild("glasses", ModelPartBuilder.create()
-				.uv(0, 32).cuboid(-4.5f, -5.2f, -4.9f, 9.0f, 2.0f, 1.0f)
-				.uv(0, 36).cuboid(-4.6f, -5.0f, -4.0f, 1.0f, 1.0f, 4.0f)
-				.uv(0, 36).mirrored().cuboid(3.6f, -5.0f, -4.0f, 1.0f, 1.0f, 4.0f), ModelTransform.NONE);
-		head.addChild("beard", ModelPartBuilder.create()
-				.uv(24, 32).cuboid(-4.0f, -3.0f, -4.0f, 8.0f, 3.0f, 4.0f, new Dilation(0.3f)), ModelTransform.NONE);
 
 		root.getChild(EntityModelPartNames.BODY).addChild("tee", ModelPartBuilder.create()
 				.uv(32, 40).cuboid(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, new Dilation(0.35f)), ModelTransform.NONE);
