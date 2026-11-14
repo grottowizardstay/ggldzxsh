@@ -1,0 +1,28 @@
+{
+	"type": "minecraft:block",
+	"pools": [
+		{
+			"rolls": 1,
+			"entries": [
+				{
+					"type": "minecraft:item",
+					"name": "kalabushkin:weight_bench",
+					"conditions": [
+						{
+							"condition": "minecraft:block_state_property",
+							"block": "kalabushkin:weight_bench",
+							"properties": {
+								"part": "head"
+							}
+						}
+					]
+				}
+			],
+			"conditions": [
+				{
+					"condition": "minecraft:survives_explosion"
+				}
+			]
+		}
+	]
+}

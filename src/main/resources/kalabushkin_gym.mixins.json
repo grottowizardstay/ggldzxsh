@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"package": "com.kalabushkin.gym.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": ["LookControlMixin", "PlayerScreenHandlerMixin", "ServerPlayNetworkHandlerMixin"],
+	"client": [
+		"client.BipedEntityModelMixin",
+		"client.CreativeInventoryScreenMixin",
+		"client.InventoryScreenMixin",
+		"client.PlayerEntityRendererMixin",
+		"client.PlayerHeldItemFeatureRendererMixin"
+	],
+	"injectors": { "defaultRequire": 1 }
+}

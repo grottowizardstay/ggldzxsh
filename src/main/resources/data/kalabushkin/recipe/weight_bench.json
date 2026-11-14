@@ -1,0 +1,20 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "misc",
+	"pattern": [
+		"WWW",
+		"I I"
+	],
+	"key": {
+		"W": {
+			"item": "minecraft:black_wool"
+		},
+		"I": {
+			"item": "minecraft:iron_ingot"
+		}
+	},
+	"result": {
+		"id": "kalabushkin:weight_bench",
+		"count": 1
+	}
+}

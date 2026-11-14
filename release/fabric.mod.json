@@ -1,0 +1,39 @@
+{
+	"schemaVersion": 1,
+	"id": "kalabushkin",
+	"version": "${version}",
+	"name": "Legends of Seltso",
+	"description": "The legends of Seltso as Minecraft mobs. Kalabushkin fist-bumps you, drops a carpenter's plane or mallet and leaves a spirit that follows you. Vlad Logutov rides his mountain bike up to you to ask a question and drops the Shatuni, a two-handed crankset you spin like a circular saw. Little Koch tags along with Vlad and drops fat. Vasily shambles around like a zombie, shakes your hand and hands out snus, vapes and cigarettes that leave you weak, sick and tripping. Barsik is a fat, invulnerable cat who hides from everyone and parachutes down from any fall. Alexey strolls with silent Rita, pays her compliments and drops a phone in a diamond case that fires gift roses and, rarely, diamonds. Darina grabs nearby mobs and players with both hands and eats them unless you throw her cooked meat; kill her and everything she swallowed comes back out. Seryoga walks with a light hop, strikes poses and mirrors any player who follows him; he drops an EGE Literature textbook. The gym: a weight bench, barbell and dumbbell for bench press, squats and bicep curls with growing working weights and strength; wrist wraps worn in an extra hands slot for a 100 kg bench press; and a T-shirt that grants strength, speed and masculinity. Romich hands out free Stary Melnik and sells beer and cigarettes for a gold coin. The route 161 marshrutka runs between the village it is parked in and the nearest other village.",
+	"icon": "assets/kalabushkin/icon.png",
+	"authors": [
+		"ancientdustlift"
+	],
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.kalabushkin.Kalabushkin",
+			"com.kalabushkin.gym.GymMod",
+			"com.kalabushkin.town.TownMod"
+		],
+		"client": [
+			"com.kalabushkin.client.KalabushkinClient",
+			"com.kalabushkin.gym.client.GymClient",
+			"com.kalabushkin.town.client.TownClient"
+		]
+	},
+	"mixins": [
+		"kalabushkin.mixins.json",
+		"kalabushkin_gym.mixins.json",
+		{
+			"config": "kalabushkin.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.16.0",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}

@@ -1,0 +1,94 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
+plugins {
+	id 'fabric-loom' version '1.11.8'
+}
+
+version = project.mod_version
+group = 'com.kalabushkin'
+
+// The add-on jar gets its own name so its mixin refmap cannot collide with the base mod's.
+base {
+	archivesName = 'kalabushkin-gym'
+}
+
+def baseJar = file("libs/legends-of-seltso-${project.base_version}.jar")
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	// Legends of Seltso 1.10.1 only exists as a compiled jar; it is loaded as-is in dev.
+	modLocalRuntime files(baseJar)
+}
+
+fabricApi {
+	configureTests {
+		createSourceSet = true
+		modId = 'kalabushkin_gym_test'
+		enableGameTests = true
+		enableClientGameTests = false
+		eula = true
+	}
+}
+
+processResources {
+	inputs.property 'version', project.version
+	filesMatching('fabric.mod.json') {
+		expand 'version': project.version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 21
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
+
+def mergedLangDir = layout.buildDirectory.dir('merged-lang')
+def langPath = 'assets/kalabushkin/lang'
+
+// Both jars ship the same lang files, so the release jar needs them merged key by key.
+tasks.register('mergeLang') {
+	inputs.file baseJar
+	inputs.dir "src/main/resources/${langPath}"
+	outputs.dir mergedLangDir
+	doLast {
+		fileTree("src/main/resources/${langPath}").each { File added ->
+			def merged = new LinkedHashMap()
+			zipTree(baseJar).matching { include "${langPath}/${added.name}" }.each {
+				merged.putAll(new JsonSlurper().parse(it, 'UTF-8'))
+			}
+			merged.putAll(new JsonSlurper().parse(added, 'UTF-8'))
+			def json = JsonOutput.prettyPrint(JsonOutput.toJson(merged))
+			// JsonOutput escapes Cyrillic; write it back as plain UTF-8 like the original files.
+			json = json.replaceAll(/\\u([0-9a-f]{4})/) { all, hex -> String.valueOf((char) Integer.parseInt(hex, 16)) }
+			def out = new File(mergedLangDir.get().asFile, "${langPath}/${added.name}")
+			out.parentFile.mkdirs()
+			out.setText(json, 'UTF-8')
+		}
+	}
+}
+
+// The shippable mod: the untouched 1.10.1 classes plus the gym add-on, under one mod id.
+tasks.register('mergedJar', Jar) {
+	dependsOn remapJar, 'mergeLang'
+	archiveBaseName = 'legends-of-seltso'
+	destinationDirectory = layout.buildDirectory.dir('release')
+	duplicatesStrategy = DuplicatesStrategy.FAIL
+	def replaced = ['fabric.mod.json', "${langPath}/*.json", 'META-INF/MANIFEST.MF']
+	from(zipTree(baseJar)) { exclude replaced }
+	from(zipTree(remapJar.archiveFile)) { exclude replaced }
+	from(mergedLangDir)
+	from('release/fabric.mod.json') { expand 'version': project.version }
+	manifest {
+		attributes 'Fabric-Mapping-Namespace': 'intermediary', 'Fabric-Minecraft-Version': project.minecraft_version
+	}
+}
+
+build.dependsOn 'mergedJar'
