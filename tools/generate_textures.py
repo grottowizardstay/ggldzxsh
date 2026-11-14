@@ -846,8 +846,8 @@ class Hi:
 
     SIDES = ("front", "back", "left", "right")
 
-    def __init__(self, seed):
-        self.img = Image.new("RGBA", (128, 128), (0, 0, 0, 0))
+    def __init__(self, seed, size=128):
+        self.img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
         self.rng = random.Random(seed)
 
     @staticmethod
@@ -1060,6 +1060,161 @@ def rita():
     return c.img
 
 
+DARINA_SKIN = (226, 180, 158)
+DARINA_SKIN_SHADE = (200, 152, 132)
+DARINA_HAIR = (58, 40, 32)
+DARINA_HAIR_LIGHT = (92, 64, 46)
+DENIM = (132, 138, 150)
+DENIM_LIGHT = (164, 170, 180)
+DENIM_DARK = (96, 102, 116)
+BLACK_TOP = (22, 22, 26)
+GLASSES = (178, 180, 188)
+MOUTH = (96, 20, 28)
+TOOTH = (240, 236, 226)
+# Hand-drawn round face, 18 wide: centre parting, dark brows, brown eyes behind the glasses, full
+# cheeks, a small closed mouth. The mouth line is the seam between the head and the hinged jaw.
+DARINA_FACE = [
+    "hhhhhhhhHHhhhhhhhh",
+    "hhhhhhsssssshhhhhh",
+    "hhhhsssssssssshhhh",
+    "hhhsssssssssssshhh",
+    "hhsbbbbssssbbbbshh",
+    "hssssssssssssssssh",
+    "hsswEesssssseEwssh",
+    "hssssssssssssssssh",
+    "jsssssssnnsssssssj",
+    "jsccssssnnssssccsj",
+    "jscccssNnnNsscccsj",
+    "jssssssmMMmssssssj",
+]
+DARINA_JAW = [
+    "jssssssMMMMssssssj",
+    "jsssssssmmsssssssj",
+    "jjssssssssssssssjj",
+    "jjjssssssssssssjjj",
+    "JjjjjssssssssjjjjJ",
+    "JJJjjjjjjjjjjjjJJJ",
+]
+DARINA_FACE_PALETTE = {
+    "h": DARINA_HAIR, "H": (40, 28, 24), "s": DARINA_SKIN, "j": DARINA_SKIN_SHADE, "J": (178, 132, 114),
+    "c": (232, 160, 146), "b": (50, 36, 30), "w": (240, 236, 230), "E": (32, 24, 22), "e": (104, 66, 42),
+    "n": (214, 166, 144), "N": (180, 130, 112), "M": (176, 92, 92), "m": (204, 124, 120),
+}
+
+
+def acid_wash(x, y):
+    """Grey denim bleached in irregular blotches."""
+    h = (x * 7 + (y // 2) * 13 + (x * y) % 5 * 3) % 17
+    return DENIM_LIGHT if h < 4 else DENIM_DARK if h > 14 else DENIM
+
+
+def darina():
+    """256x256 for a 128x128 model texture."""
+    c = Hi(97, 256)
+    hair_color = strands(DARINA_HAIR, DARINA_HAIR_LIGHT)
+
+    def mouth(inside):
+        # A lip, then a row of teeth, round the edge of the face that closes the mouth.
+        def color(x, y):
+            edge = min(x, y, 17 - x, 17 - y)
+            if edge == 0:
+                return DARINA_FACE_PALETTE["M"]
+            if edge == 1:
+                return TOOTH if (x + y) % 3 else (214, 208, 196)
+            return inside(x, y)
+        return color
+
+    head = c.box(0, 0, 9, 6, 9)
+    c.paint_box(head, hair_color, 5)
+    c.paint(head["top"], lambda x, y: (40, 28, 24) if x in (8, 9) else hair_color(x, y), 5)
+    c.grid(head["front"], DARINA_FACE, DARINA_FACE_PALETTE)
+    # Roof of the mouth and, on the jaw, the tongue: seen when the jaw drops.
+    c.paint(head["bottom"], mouth(lambda x, y: (124, 34, 44) if x in (8, 9) else MOUTH), 3)
+    jaw = c.box(0, 15, 9, 3, 9)
+    c.paint_box(jaw, DARINA_SKIN_SHADE, 3)
+    c.paint(jaw["back"], hair_color, 5)
+    c.grid(jaw["front"], DARINA_JAW, DARINA_FACE_PALETTE)
+    c.paint(jaw["top"], mouth(lambda x, y: (214, 104, 116) if (x - 8.5) ** 2 / 20 + (y - 8) ** 2 / 34 < 1 else MOUTH), 3)
+
+    c.paint_box(c.box(72, 14, 9, 4, 1), lambda x, y: (60, 10, 18) if 5 <= x <= 12 and y > 2 else MOUTH, 3)
+
+    # Outer layer: hair all round, open at the front apart from the hairline and the edges of the face.
+    hair = c.box(36, 0, 9, 9, 9)
+    c.paint_box(hair, hair_color, 5, only=("back", "left", "right"))
+    c.paint(hair["top"], lambda x, y: (40, 28, 24) if x in (8, 9) and y > 4 else hair_color(x, y), 5)
+    c.paint(hair["front"], lambda x, y: hair_color(x, y) if y < 2 and not 7 <= x <= 10 or x < 1 or x > 16 else None, 5)
+
+    # Thin metal frames with a glint on the lenses.
+    glasses = c.box(72, 10, 9, 3, 1)
+
+    def frame(x, y):
+        for left in (1, 10):
+            if left <= x <= left + 6:
+                corner = x in (left, left + 6) and y in (0, 5)
+                if not corner and (x in (left, left + 6) or y in (0, 5)):
+                    return GLASSES
+        if y == 1 and x in (0, 8, 9, 17):
+            return GLASSES
+        return (226, 236, 244) if (x, y) in ((3, 1), (4, 2), (12, 1)) else None
+
+    c.paint(glasses["front"], frame, 3)
+    for side in ("left", "right"):
+        c.paint(glasses[side], lambda x, y: GLASSES if y == 1 else None, 3)
+
+    body = c.box(0, 27, 14, 14, 8)
+    c.paint_box(body, BLACK_TOP, 3)
+    c.paint(body["front"], lambda x, y: DARINA_SKIN if y < 2 and 10 <= x <= 17 else
+            DARINA_SKIN_SHADE if y == 2 and 11 <= x <= 16 else BLACK_TOP, 3)
+    c.paint_box(c.box(72, 0, 12, 8, 2), lambda x, y: (34, 34, 40) if (x + y) % 9 == 0 else BLACK_TOP, 3)
+
+    # Oversized acid-wash denim jacket, worn open, with a small red pin on her left lapel.
+    jacket = c.box(44, 27, 14, 14, 8)
+    c.paint_box(jacket, lambda x, y: DENIM_DARK if y >= 26 else acid_wash(x, y), only=("left", "right"))
+    c.paint(jacket["top"], acid_wash)
+    c.paint(jacket["back"], lambda x, y: DENIM_DARK if y in (7, 26, 27) or x in (9, 18) and y > 7 else acid_wash(x, y))
+
+    def jacket_front(x, y):
+        if 9 <= x <= 18:
+            return None
+        side = x if x < 9 else 27 - x
+        if (x, y) in ((21, 4), (22, 4), (21, 5), (22, 5)):
+            return (204, 30, 40)
+        if side == 8:
+            return GLASSES if y % 6 == 3 else DENIM_DARK
+        if side == 7 and y < 10 or side == 6 and y < 6:
+            return DENIM_LIGHT
+        if y >= 26 or y == 10 and 1 <= side <= 6 or 11 <= y <= 15 and side in (1, 6):
+            return DENIM_DARK
+        if y == 12 and side in (3, 4):
+            return GLASSES
+        return acid_wash(x, y)
+
+    c.paint(jacket["front"], jacket_front)
+
+    for u, v in ((88, 27), (108, 27)):
+        arm = c.box(u, v, 5, 14, 5)
+        c.paint_box(arm, acid_wash)
+        for name in Hi.SIDES:
+            c.paint(arm[name], lambda x, y: DARINA_SKIN if y >= 24 else DENIM_LIGHT if y == 20 else
+                    DENIM_DARK if y > 20 else acid_wash(x, y))
+        c.paint(arm["bottom"], DARINA_SKIN_SHADE, 3)
+    for u, v in ((0, 49), (24, 49)):
+        leg = c.box(u, v, 6, 12, 6)
+        c.paint_box(leg, BLACK_JEANS, 3)
+        for name in Hi.SIDES:
+            c.paint(leg[name], lambda x, y: (222, 222, 224) if y == 23 else (58, 58, 64) if y >= 19 else BLACK_JEANS, 3)
+        c.paint(leg["bottom"], (222, 222, 224), 3)
+
+    # Long hair down the back and over the shoulders, lighter towards the ends.
+    def lengths(rows):
+        return lambda x, y: DARINA_HAIR_LIGHT if y > rows * 0.6 and (x + y) % 3 == 0 else hair_color(x, y)
+
+    c.paint_box(c.box(100, 0, 9, 14, 1), lengths(28), 5)
+    for v in (0, 12):
+        c.paint_box(c.box(120, v, 2, 11, 1), lengths(22), 5)
+    return c.img
+
+
 def trip_icon():
     """18x18 status effect icon: a rainbow spiral."""
     img = Image.new("RGBA", (18, 18), (0, 0, 0, 0))
@@ -1090,6 +1245,7 @@ def main():
     barsik().save(f"{OUT}/entity/barsik.png")
     alexey().save(f"{OUT}/entity/alexey_srpava.png")
     rita().save(f"{OUT}/entity/rita.png")
+    darina().save(f"{OUT}/entity/darina.png")
     os.makedirs(f"{OUT}/mob_effect", exist_ok=True)
     trip_icon().save(f"{OUT}/mob_effect/trip.png")
 

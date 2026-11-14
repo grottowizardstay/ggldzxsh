@@ -45,6 +45,8 @@ public final class ModItems {
 			new SpawnEggItem(ModEntities.ALEXEY_SRPAVA, 0x2A2628, 0x5CDCD6, new Item.Settings()));
 	public static final Item RITA_SPAWN_EGG = register("rita_spawn_egg",
 			new SpawnEggItem(ModEntities.RITA, 0x96AAB2, 0x3E2C24, new Item.Settings()));
+	public static final Item DARINA_SPAWN_EGG = register("darina_spawn_egg",
+			new SpawnEggItem(ModEntities.DARINA, 0x848A96, 0x3A2820, new Item.Settings()));
 	// Dropped by Alexey.
 	public static final Item DIAMOND_PHONE = register("diamond_phone",
 			new DiamondPhoneItem(new Item.Settings().maxCount(1).rarity(Rarity.RARE)));
@@ -69,6 +71,7 @@ public final class ModItems {
 						entries.add(BARSIK_SPAWN_EGG);
 						entries.add(ALEXEY_SRPAVA_SPAWN_EGG);
 						entries.add(RITA_SPAWN_EGG);
+						entries.add(DARINA_SPAWN_EGG);
 						entries.add(SHATUNI);
 						entries.add(CARPENTER_PLANE);
 						entries.add(WOODEN_MALLET);
@@ -112,6 +115,7 @@ public final class ModItems {
 					entries.add(BARSIK_SPAWN_EGG);
 					entries.add(ALEXEY_SRPAVA_SPAWN_EGG);
 					entries.add(RITA_SPAWN_EGG);
+					entries.add(DARINA_SPAWN_EGG);
 				});
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.FOOD_AND_DRINK).register(entries -> {
 			entries.add(FAT);

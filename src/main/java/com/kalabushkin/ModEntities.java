@@ -2,6 +2,7 @@ package com.kalabushkin;
 
 import com.kalabushkin.entity.AlexeyEntity;
 import com.kalabushkin.entity.BarsikEntity;
+import com.kalabushkin.entity.DarinaEntity;
 import com.kalabushkin.entity.GiftEntity;
 import com.kalabushkin.entity.KalabushkinEntity;
 import com.kalabushkin.entity.KalabushkinSpiritEntity;
@@ -110,6 +111,15 @@ public final class ModEntities {
 					.maxTrackingRange(10)
 					.build());
 
+	public static final EntityType<DarinaEntity> DARINA = Registry.register(
+			Registries.ENTITY_TYPE,
+			Kalabushkin.id("darina"),
+			EntityType.Builder.create(DarinaEntity::new, SpawnGroup.CREATURE)
+					.dimensions(1.0f, 2.2f)
+					.eyeHeight(1.9f)
+					.maxTrackingRange(10)
+					.build());
+
 	private ModEntities() {
 	}
 
@@ -123,6 +133,7 @@ public final class ModEntities {
 		FabricDefaultAttributeRegistry.register(BARSIK, BarsikEntity.createAttributes());
 		FabricDefaultAttributeRegistry.register(ALEXEY_SRPAVA, AlexeyEntity.createAttributes());
 		FabricDefaultAttributeRegistry.register(RITA, RitaEntity.createAttributes());
+		FabricDefaultAttributeRegistry.register(DARINA, DarinaEntity.createAttributes());
 
 		SpawnRestriction.register(KALABUSHKIN, SpawnLocationTypes.ON_GROUND,
 				Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, KalabushkinEntity::canSpawnHere);
@@ -159,5 +170,11 @@ public final class ModEntities {
 				BiomeSelectors.includeByKey(BiomeKeys.PLAINS, BiomeKeys.MEADOW, BiomeKeys.FLOWER_FOREST,
 						BiomeKeys.BIRCH_FOREST),
 				SpawnGroup.CREATURE, ALEXEY_SRPAVA, 3, 1, 1);
+
+		SpawnRestriction.register(DARINA, SpawnLocationTypes.ON_GROUND,
+				Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, DarinaEntity::canSpawnHere);
+		BiomeModifications.addSpawn(
+				BiomeSelectors.includeByKey(BiomeKeys.PLAINS, BiomeKeys.FOREST, BiomeKeys.DARK_FOREST, BiomeKeys.TAIGA),
+				SpawnGroup.CREATURE, DARINA, 2, 1, 1);
 	}
 }

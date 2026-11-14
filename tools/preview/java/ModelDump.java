@@ -5,6 +5,8 @@ import com.kalabushkin.client.AlexeyModel;
 import com.kalabushkin.client.BarsikAnimations;
 import com.kalabushkin.client.BarsikModel;
 import com.kalabushkin.client.CoupleAnimations;
+import com.kalabushkin.client.DarinaAnimations;
+import com.kalabushkin.client.DarinaModel;
 import com.kalabushkin.client.LittleKochAnimations;
 import com.kalabushkin.client.LittleKochModel;
 import com.kalabushkin.client.RitaModel;
@@ -74,6 +76,28 @@ public final class ModelDump {
 				rita.getPart().traverse().forEach(ModelPart::resetTransform);
 				animate(rita, CoupleAnimations.LISTEN, time, 1.0f);
 				dump("listen" + time, rita);
+			}
+		}
+
+		DarinaModel darina = new DarinaModel(DarinaModel.getTexturedModelData().createModel());
+		try (PrintWriter writer = new PrintWriter(args[0] + "/darina.txt")) {
+			out = writer;
+			darina.getPart().traverse().forEach(ModelPart::resetTransform);
+			dump("stand", darina);
+			darina.getPart().traverse().forEach(ModelPart::resetTransform);
+			animate(darina, DarinaAnimations.WADDLE, 300L, 1.0f);
+			dump("waddle", darina);
+			darina.getPart().traverse().forEach(ModelPart::resetTransform);
+			animate(darina, DarinaAnimations.HUNGRY, 400L, 1.0f);
+			dump("hungry", darina);
+			darina.getPart().traverse().forEach(ModelPart::resetTransform);
+			animate(darina, DarinaAnimations.MUNCH, 550L, 1.0f);
+			dump("munch", darina);
+			long[] eatTimes = {500L, 1200L, 1650L, 2000L, 3050L, 3250L};
+			for (long time : eatTimes) {
+				darina.getPart().traverse().forEach(ModelPart::resetTransform);
+				animate(darina, DarinaAnimations.EAT, time, 1.0f);
+				dump("eat" + time, darina);
 			}
 		}
 
