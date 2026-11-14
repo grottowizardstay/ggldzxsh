@@ -31,6 +31,7 @@ public class KalabushkinClient implements ClientModInitializer {
 		EntityModelLayerRegistry.registerModelLayer(AlexeyModel.LAYER, AlexeyModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(RitaModel.LAYER, RitaModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(DarinaModel.LAYER, DarinaModel::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(SeryogaModel.LAYER, SeryogaModel::getTexturedModelData);
 		EntityRendererRegistry.register(ModEntities.KALABUSHKIN, KalabushkinRenderer::new);
 		EntityRendererRegistry.register(ModEntities.SPIRIT, KalabushkinSpiritRenderer::new);
 		EntityRendererRegistry.register(ModEntities.VLAD_LOGUTOV, VladLogutovRenderer::new);
@@ -40,6 +41,7 @@ public class KalabushkinClient implements ClientModInitializer {
 		EntityRendererRegistry.register(ModEntities.ALEXEY_SRPAVA, AlexeyRenderer::new);
 		EntityRendererRegistry.register(ModEntities.RITA, RitaRenderer::new);
 		EntityRendererRegistry.register(ModEntities.DARINA, DarinaRenderer::new);
+		EntityRendererRegistry.register(ModEntities.SERYOGA, SeryogaRenderer::new);
 		EntityRendererRegistry.register(ModEntities.GIFT, context -> new FlyingItemEntityRenderer<>(context, 1.25f, true));
 		TripVisuals.init();
 		DrunkVisuals.init();

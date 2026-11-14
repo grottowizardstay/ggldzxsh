@@ -1215,6 +1215,102 @@ def darina():
     return c.img
 
 
+SERYOGA_SKIN = (232, 190, 170)
+SERYOGA_SKIN_SHADE = (206, 160, 142)
+SERYOGA_HAIR = (136, 104, 70)
+SERYOGA_HAIR_LIGHT = (168, 134, 92)
+WHITE_SHIRT = (232, 232, 236)
+WHITE_SHIRT_SHADE = (198, 200, 210)
+GREY_TROUSERS = (62, 64, 74)
+# Hand-drawn long, narrow face: short hair with the fringe swept to one side, thin-rimmed glasses,
+# a small pursed mouth. The shaded edges narrow the face on the square head.
+SERYOGA_FACE = [
+    "hhhhhhhhhhhhhhhh",
+    "hhHhhhhHhhhhHhhh",
+    "hhhhhhhhhhhhhhhh",
+    "hhhhHhhhhhsshhhh",
+    "hhhhhhhssssssshh",
+    "hjssssssssssssjh",
+    "hjbbbbssssbbbbjh",
+    "ggwEesggggseEwgg",
+    "hjgggggssgggggjh",
+    "JjsssssnnsssssjJ",
+    "JjssssNnnNssssjJ",
+    "JjjsssssssssjjjJ",
+    "JJjssmMMMMmssjJJ",
+    "JJjjssssssssjjJJ",
+    "JJJjjssssssjjJJJ",
+    "JJJJjjjssjjjJJJJ",
+]
+SERYOGA_FACE_PALETTE = {
+    "h": SERYOGA_HAIR, "H": SERYOGA_HAIR_LIGHT, "s": SERYOGA_SKIN, "j": SERYOGA_SKIN_SHADE, "J": (182, 138, 122),
+    "b": (112, 84, 58), "w": (238, 236, 230), "E": (46, 40, 38), "e": (96, 112, 120), "g": (150, 152, 160),
+    "n": (218, 174, 156), "N": (186, 138, 122), "m": (206, 142, 130), "M": (178, 106, 100),
+}
+
+
+def seryoga():
+    c = Hi(113)
+    hair_color = strands(SERYOGA_HAIR, SERYOGA_HAIR_LIGHT)
+    head = c.box(0, 0, 8, 8, 8)
+    c.paint_box(head, SERYOGA_SKIN)
+    c.paint(head["top"], hair_color, 5)
+    c.paint(head["back"], lambda x, y: hair_color(x, y) if y < 12 else SERYOGA_SKIN_SHADE, 5)
+    for side in ("left", "right"):
+        # Short at the sides: hair to the top of the ear, the ear itself a darker patch.
+        c.paint(head[side], lambda x, y: hair_color(x, y) if y < 7 else
+                SERYOGA_SKIN_SHADE if 8 <= y <= 11 and 7 <= x <= 9 else SERYOGA_SKIN, 5)
+    c.paint(head["bottom"], SERYOGA_SKIN_SHADE, 3)
+    c.grid(head["front"], SERYOGA_FACE, SERYOGA_FACE_PALETTE)
+    # Outer layer: the hair standing off the skull, and the arms of the glasses along the temples.
+    hair = c.box(32, 0, 8, 8, 8)
+    c.paint(hair["top"], hair_color, 5)
+    c.paint(hair["back"], lambda x, y: hair_color(x, y) if y < 10 else None, 5)
+    for side in ("left", "right"):
+        c.paint(hair[side], lambda x, y: hair_color(x, y) if y < 6 else (150, 152, 160) if y == 7 else None, 5)
+    c.paint(hair["front"], lambda x, y: hair_color(x, y) if y < 3 or y < 5 and x < 7 else None, 5)
+
+    # White shirt, collar open at the neck, buttoned placket, tucked into grey trousers with a belt.
+    def shirt(x, y):
+        return (40, 36, 34) if y in (26, 27) else WHITE_SHIRT_SHADE if x == 0 else WHITE_SHIRT
+
+    body = c.box(16, 16, 8, 14, 4)
+    c.paint_box(body, shirt, only=Hi.SIDES)
+
+    def shirt_front(x, y):
+        if y < 5 and abs(x - 7.5) < 2.5 - y * 0.5:
+            return SERYOGA_SKIN
+        if y < 6 and abs(x - 7.5) < 5 - y * 0.4:
+            return WHITE_SHIRT_SHADE if abs(x - 7.5) > 3.5 - y * 0.4 else WHITE_SHIRT
+        if (x, y) in ((7, 26), (8, 26), (7, 27), (8, 27)):
+            return (176, 176, 182)
+        if x in (7, 8) and 6 <= y < 26:
+            return (150, 152, 162) if y % 5 == 2 and x == 7 else WHITE_SHIRT_SHADE
+        return shirt(x, y)
+
+    c.paint(body["front"], shirt_front)
+    c.paint(body["top"], WHITE_SHIRT)
+    c.paint(body["bottom"], GREY_TROUSERS, 3)
+    c.paint_box(c.box(16, 36, 2, 1, 2), SERYOGA_SKIN_SHADE, 3)
+
+    for u, v in ((40, 16), (52, 16)):
+        arm = c.box(u, v, 3, 15, 3)
+        c.paint_box(arm, WHITE_SHIRT)
+        for name in Hi.SIDES:
+            # Long sleeve with a buttoned cuff, then the hand.
+            c.paint(arm[name], lambda x, y: SERYOGA_SKIN if y >= 26 else WHITE_SHIRT_SHADE if y in (22, 25) else
+                    WHITE_SHIRT_SHADE if x == 0 else WHITE_SHIRT)
+        c.paint(arm["bottom"], SERYOGA_SKIN_SHADE, 3)
+    for u, v in ((0, 16), (0, 36)):
+        leg = c.box(u, v, 3, 17, 3)
+        c.paint_box(leg, GREY_TROUSERS, 3)
+        for name in Hi.SIDES:
+            c.paint(leg[name], lambda x, y: (24, 22, 22) if y >= 30 else (48, 50, 58) if x == 0 else GREY_TROUSERS, 3)
+        c.paint(leg["front"], lambda x, y: (24, 22, 22) if y >= 30 else (84, 86, 96) if x == 3 else GREY_TROUSERS, 3)
+        c.paint(leg["bottom"], (24, 22, 22), 3)
+    return c.img
+
+
 def trip_icon():
     """18x18 status effect icon: a rainbow spiral."""
     img = Image.new("RGBA", (18, 18), (0, 0, 0, 0))
@@ -1246,6 +1342,7 @@ def main():
     alexey().save(f"{OUT}/entity/alexey_srpava.png")
     rita().save(f"{OUT}/entity/rita.png")
     darina().save(f"{OUT}/entity/darina.png")
+    seryoga().save(f"{OUT}/entity/seryoga.png")
     os.makedirs(f"{OUT}/mob_effect", exist_ok=True)
     trip_icon().save(f"{OUT}/mob_effect/trip.png")
 

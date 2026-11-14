@@ -10,6 +10,8 @@ import com.kalabushkin.client.DarinaModel;
 import com.kalabushkin.client.LittleKochAnimations;
 import com.kalabushkin.client.LittleKochModel;
 import com.kalabushkin.client.RitaModel;
+import com.kalabushkin.client.SeryogaAnimations;
+import com.kalabushkin.client.SeryogaModel;
 import com.kalabushkin.client.VasilyAnimations;
 import com.kalabushkin.client.VasilyModel;
 import com.kalabushkin.client.VladLogutovAnimations;
@@ -110,6 +112,25 @@ public final class ModelDump {
 				darina.getPart().traverse().forEach(ModelPart::resetTransform);
 				animate(darina, DarinaAnimations.EAT, time, 1.0f);
 				dump("eat" + time, darina);
+			}
+		}
+
+		SeryogaModel seryoga = new SeryogaModel(SeryogaModel.getTexturedModelData().createModel());
+		try (PrintWriter writer = new PrintWriter(args[0] + "/seryoga.txt")) {
+			out = writer;
+			seryoga.pose(0.0f, false, 0.0f, 0.0f);
+			dump("stand", seryoga);
+			seryoga.pose(1.0f, false, 0.0f, 0.0f);
+			dump("hop", seryoga);
+			seryoga.pose(0.0f, true, 0.0f, 0.0f);
+			dump("crouch", seryoga);
+			seryoga.pose(0.0f, false, 0.0f, 0.0f);
+			animate(seryoga, SeryogaAnimations.NOTICE, 300L, 1.0f);
+			dump("notice", seryoga);
+			for (int i = 0; i < SeryogaAnimations.POSES.length; i++) {
+				seryoga.pose(0.0f, false, 0.0f, 0.0f);
+				animate(seryoga, SeryogaAnimations.POSES[i], 1400L, 1.0f);
+				dump("pose" + i, seryoga);
 			}
 		}
 

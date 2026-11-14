@@ -8,6 +8,7 @@ import com.kalabushkin.entity.KalabushkinEntity;
 import com.kalabushkin.entity.KalabushkinSpiritEntity;
 import com.kalabushkin.entity.LittleKochEntity;
 import com.kalabushkin.entity.RitaEntity;
+import com.kalabushkin.entity.SeryogaEntity;
 import com.kalabushkin.entity.VasilyEntity;
 import com.kalabushkin.entity.VladLogutovEntity;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
@@ -120,6 +121,15 @@ public final class ModEntities {
 					.maxTrackingRange(10)
 					.build());
 
+	public static final EntityType<SeryogaEntity> SERYOGA = Registry.register(
+			Registries.ENTITY_TYPE,
+			Kalabushkin.id("seryoga"),
+			EntityType.Builder.create(SeryogaEntity::new, SpawnGroup.CREATURE)
+					.dimensions(0.6f, 2.5f)
+					.eyeHeight(2.25f)
+					.maxTrackingRange(10)
+					.build());
+
 	private ModEntities() {
 	}
 
@@ -134,6 +144,7 @@ public final class ModEntities {
 		FabricDefaultAttributeRegistry.register(ALEXEY_SRPAVA, AlexeyEntity.createAttributes());
 		FabricDefaultAttributeRegistry.register(RITA, RitaEntity.createAttributes());
 		FabricDefaultAttributeRegistry.register(DARINA, DarinaEntity.createAttributes());
+		FabricDefaultAttributeRegistry.register(SERYOGA, SeryogaEntity.createAttributes());
 
 		SpawnRestriction.register(KALABUSHKIN, SpawnLocationTypes.ON_GROUND,
 				Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, KalabushkinEntity::canSpawnHere);
@@ -176,5 +187,12 @@ public final class ModEntities {
 		BiomeModifications.addSpawn(
 				BiomeSelectors.includeByKey(BiomeKeys.PLAINS, BiomeKeys.FOREST, BiomeKeys.DARK_FOREST, BiomeKeys.TAIGA),
 				SpawnGroup.CREATURE, DARINA, 2, 1, 1);
+
+		SpawnRestriction.register(SERYOGA, SpawnLocationTypes.ON_GROUND,
+				Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, SeryogaEntity::canSpawnHere);
+		BiomeModifications.addSpawn(
+				BiomeSelectors.includeByKey(BiomeKeys.PLAINS, BiomeKeys.SUNFLOWER_PLAINS, BiomeKeys.MEADOW,
+						BiomeKeys.BIRCH_FOREST),
+				SpawnGroup.CREATURE, SERYOGA, 3, 1, 1);
 	}
 }
