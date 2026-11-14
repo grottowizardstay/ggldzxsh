@@ -1,0 +1,9 @@
+.build/
+.venv-build/
+__pycache__/
+build/
+dist/
+*.spec
+card.txt
+card.txt.lock
+.card-*
