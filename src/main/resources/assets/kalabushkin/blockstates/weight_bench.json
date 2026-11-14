@@ -1,18 +1,33 @@
 {
 	"variants": {
-		"facing=north": {
-			"model": "kalabushkin:block/weight_bench"
+		"facing=north,part=head": {
+			"model": "kalabushkin:block/weight_bench_head"
 		},
-		"facing=east": {
-			"model": "kalabushkin:block/weight_bench",
+		"facing=north,part=foot": {
+			"model": "kalabushkin:block/weight_bench_foot"
+		},
+		"facing=east,part=head": {
+			"model": "kalabushkin:block/weight_bench_head",
 			"y": 90
 		},
-		"facing=south": {
-			"model": "kalabushkin:block/weight_bench",
+		"facing=east,part=foot": {
+			"model": "kalabushkin:block/weight_bench_foot",
+			"y": 90
+		},
+		"facing=south,part=head": {
+			"model": "kalabushkin:block/weight_bench_head",
 			"y": 180
 		},
-		"facing=west": {
-			"model": "kalabushkin:block/weight_bench",
+		"facing=south,part=foot": {
+			"model": "kalabushkin:block/weight_bench_foot",
+			"y": 180
+		},
+		"facing=west,part=head": {
+			"model": "kalabushkin:block/weight_bench_head",
+			"y": 270
+		},
+		"facing=west,part=foot": {
+			"model": "kalabushkin:block/weight_bench_foot",
 			"y": 270
 		}
 	}

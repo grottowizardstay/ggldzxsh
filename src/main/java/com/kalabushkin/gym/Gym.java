@@ -21,12 +21,14 @@ import net.minecraft.util.Identifier;
 
 /** Server-side exercise rules: reps, working weights and the strength they build. */
 public final class Gym {
-	/** Bench press at or above this weight needs wrist wraps in the off hand. */
+	/** Bench press at or above this weight needs wrist wraps in the hands slot. */
 	public static final int WRAPS_KG = 100;
 	public static final double DAMAGE_PER_LEVEL = 0.5;
 	public static final double MAX_DAMAGE_BONUS = 6.0;
 	private static final int MIN_FOOD = 6;
 	private static final int MIN_SQUAT_TICKS = 6;
+	/** Length of one bench press; the client animation uses the same value. */
+	public static final int BENCH_REP_TICKS = 20;
 	private static final Identifier STRENGTH_MODIFIER = GymMod.id("gym_strength");
 
 	private static final Map<ServerPlayerEntity, Integer> SQUAT_TICKS = new WeakHashMap<>();
@@ -39,7 +41,7 @@ public final class Gym {
 	}
 
 	public static boolean hasWraps(ServerPlayerEntity player) {
-		return player.getOffHandStack().isOf(GymContent.WRIST_WRAPS);
+		return HandSlot.get(player).isOf(GymContent.WRIST_WRAPS);
 	}
 
 	/** Performs one rep. Returns false when the player could not do it. */
@@ -100,7 +102,24 @@ public final class Gym {
 		return true;
 	}
 
+	/** One press on the bench the player lies on; starts the press animation for everyone watching. */
+	public static void benchRep(ServerPlayerEntity player) {
+		BenchPose pose = player.getAttached(GymContent.BENCH);
+		if (pose == null || player.getItemCooldownManager().isCoolingDown(GymContent.BARBELL)) {
+			return;
+		}
+		if (!player.getMainHandStack().isOf(GymContent.BARBELL)) {
+			overlay(player, Text.translatable("gym.kalabushkin.need_barbell"));
+			return;
+		}
+		player.getItemCooldownManager().set(GymContent.BARBELL, BENCH_REP_TICKS + 5);
+		if (rep(player, Exercise.BENCH)) {
+			player.setAttached(GymContent.BENCH, new BenchPose(pose.yaw(), player.getWorld().getTime()));
+		}
+	}
+
 	public static void tick(ServerPlayerEntity player, int serverTicks) {
+		tickBench(player);
 		tickSquat(player);
 		if (serverTicks % 10 == 0) {
 			tickTee(player);
@@ -108,9 +127,21 @@ public final class Gym {
 		}
 	}
 
+	/** Keeps the synced lying pose in step with the seat, including after a relog on the bench. */
+	private static void tickBench(ServerPlayerEntity player) {
+		boolean lying = BenchSeats.isLying(player);
+		boolean posed = player.hasAttached(GymContent.BENCH);
+		if (lying && !posed) {
+			player.setAttached(GymContent.BENCH, new BenchPose(player.getVehicle().getYaw(), 0L));
+		} else if (!lying && posed) {
+			player.removeAttached(GymContent.BENCH);
+		}
+	}
+
 	/** A squat is a full crouch and stand with the barbell in the main hand. */
 	private static void tickSquat(ServerPlayerEntity player) {
-		boolean ready = player.getMainHandStack().isOf(GymContent.BARBELL) && player.isOnGround() && !player.isSpectator();
+		boolean ready = player.getMainHandStack().isOf(GymContent.BARBELL) && player.isOnGround()
+				&& !player.isSpectator() && !player.hasVehicle();
 		int ticks = SQUAT_TICKS.getOrDefault(player, 0);
 		if (ready && player.isSneaking()) {
 			SQUAT_TICKS.put(player, ticks + 1);

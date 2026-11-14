@@ -7,9 +7,16 @@
 	"license": "MIT",
 	"environment": "*",
 	"entrypoints": {
-		"main": ["com.kalabushkin.gym.GymMod"]
+		"main": [
+			"com.kalabushkin.gym.GymMod"
+		],
+		"client": [
+			"com.kalabushkin.gym.client.GymClient"
+		]
 	},
-	"mixins": ["kalabushkin_gym.mixins.json"],
+	"mixins": [
+		"kalabushkin_gym.mixins.json"
+	],
 	"depends": {
 		"fabricloader": ">=0.16.0",
 		"minecraft": "~1.21.1",

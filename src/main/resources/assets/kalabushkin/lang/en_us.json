@@ -1,10 +1,10 @@
 {
 	"item.kalabushkin.wrist_wraps": "Wrist Wraps",
-	"item.kalabushkin.wrist_wraps.tooltip": "Keep them in your off hand to bench press 100 kg and more",
+	"item.kalabushkin.wrist_wraps.tooltip": "Wear them in the hands slot of your inventory to bench press 100 kg and more",
 	"item.kalabushkin.masculine_tee": "Masculine T-Shirt",
 	"item.kalabushkin.masculine_tee.tooltip": "Worn: Strength, Speed and Masculinity",
 	"item.kalabushkin.barbell": "Barbell",
-	"item.kalabushkin.barbell.tooltip": "Use on a Weight Bench to bench press; crouch and stand up to squat",
+	"item.kalabushkin.barbell.tooltip": "Use on a Weight Bench to lie down, then use to press; crouch and stand up to squat",
 	"item.kalabushkin.dumbbell": "Dumbbell",
 	"item.kalabushkin.dumbbell.tooltip": "Hold use to do bicep curls",
 	"block.kalabushkin.weight_bench": "Weight Bench",
@@ -18,10 +18,12 @@
 	"gym.kalabushkin.strength_up": "Strength level %s: +%s attack damage",
 	"gym.kalabushkin.hungry": "Too hungry to train. Eat first.",
 	"gym.kalabushkin.need_barbell": "Take a barbell in your main hand to bench press",
-	"gym.kalabushkin.need_wraps": "Your wrists won't hold %s kg. Put wrist wraps in your off hand.",
-	"gym.kalabushkin.wraps_plateau": "You are ready for %s kg, but not without wrist wraps in your off hand",
+	"gym.kalabushkin.need_wraps": "Your wrists won't hold %s kg. Put on wrist wraps.",
+	"gym.kalabushkin.wraps_plateau": "You are ready for %s kg, but not without wrist wraps on",
 	"gym.kalabushkin.bench_100": "%s bench pressed %s kg!",
 	"gym.kalabushkin.stats.title": "Gym progress",
 	"gym.kalabushkin.stats.line": "%s: %s kg (rep %s/%s)",
-	"gym.kalabushkin.stats.strength": "Strength level %s: +%s attack damage"
+	"gym.kalabushkin.stats.strength": "Strength level %s: +%s attack damage",
+	"gym.kalabushkin.bench_hint": "Use the barbell to press. Sneak to get up.",
+	"gym.kalabushkin.bench_taken": "Someone is already on this bench"
 }
