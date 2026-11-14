@@ -1,0 +1,10 @@
+{
+	"schemaVersion": 1,
+	"id": "kalabushkin_gym_test",
+	"version": "1.0.0",
+	"name": "Legends of Seltso gym tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-gametest": ["com.kalabushkin.gym.test.GymGameTest"]
+	}
+}

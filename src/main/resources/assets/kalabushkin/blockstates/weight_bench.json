@@ -1,0 +1,19 @@
+{
+	"variants": {
+		"facing=north": {
+			"model": "kalabushkin:block/weight_bench"
+		},
+		"facing=east": {
+			"model": "kalabushkin:block/weight_bench",
+			"y": 90
+		},
+		"facing=south": {
+			"model": "kalabushkin:block/weight_bench",
+			"y": 180
+		},
+		"facing=west": {
+			"model": "kalabushkin:block/weight_bench",
+			"y": 270
+		}
+	}
+}
