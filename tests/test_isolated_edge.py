@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from unittest.mock import patch, Mock
 
-spec = importlib.util.spec_from_file_location('isolated_chrome', Path(__file__).parents[1] / 'scripts/isolated_chrome.py')
+spec = importlib.util.spec_from_file_location('isolated_edge', Path(__file__).parents[1] / 'scripts/isolated_edge.py')
 app = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(app)
 SECRET = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ'  # Public RFC 6238 test vector.
@@ -60,18 +60,29 @@ class LauncherTests(unittest.TestCase):
         app.prepare_hoplite(page, {'sessions_opened': True})
         page.get_by_role.assert_not_called()
 
+    def test_windows_edge_discovery(self):
+        expected = Path('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe')
+        with patch.object(app.sys, 'platform', 'win32'), patch.dict(app.os.environ, {'PROGRAMFILES(X86)': 'C:/Program Files (x86)'}, clear=True), patch.object(Path, 'is_file', lambda path: path == expected):
+            self.assertEqual(app.find_edge(), str(expected))
+
+    def test_no_chrome_fallback(self):
+        with patch.object(app.sys, 'platform', 'linux'), patch.object(app.shutil, 'which', return_value=None) as which:
+            with self.assertRaises(FileNotFoundError):
+                app.find_edge()
+        self.assertEqual([call.args[0] for call in which.call_args_list], ['microsoft-edge', 'microsoft-edge-stable', 'msedge'])
+
     def test_custom_executable(self):
         with tempfile.NamedTemporaryFile() as file:
-            self.assertEqual(app.find_chrome(file.name), str(Path(file.name).resolve()))
+            self.assertEqual(app.find_edge(file.name), str(Path(file.name).resolve()))
         with self.assertRaises(FileNotFoundError):
-            app.find_chrome('/nonexistent/chrome')
+            app.find_edge('/nonexistent/edge')
 
     def test_visible_input_without_confirmation(self):
         record = f'user@example.invalid:dummy-password:{SECRET}:dummy:demo'
-        with patch.object(app.sys, 'argv', ['script']), patch.object(app, 'find_chrome', return_value='/chrome'), patch('builtins.input', return_value=record) as prompt, patch.object(app, 'launch', return_value=0) as launch:
+        with patch.object(app.sys, 'argv', ['script']), patch.object(app, 'find_edge', return_value='/edge'), patch('builtins.input', return_value=record) as prompt, patch.object(app, 'launch', return_value=0) as launch:
             self.assertEqual(app.main(), 0)
             prompt.assert_called_once_with('Account data: ')
-            launch.assert_called_once_with('/chrome', SECRET, 'user@example.invalid', 'dummy-password')
+            launch.assert_called_once_with('/edge', SECRET, 'user@example.invalid', 'dummy-password')
 
     def test_foreign_origin_does_not_receive_credentials(self):
         for url in ['http://github.com/login', 'https://github.com.evil.invalid/login', 'https://evil.invalid/login']:
@@ -81,7 +92,7 @@ class LauncherTests(unittest.TestCase):
             page.evaluate.assert_not_called()
 
     def test_automation_errors_do_not_print_password(self):
-        with patch.object(app.sys, 'argv', ['script']), patch.object(app, 'find_chrome', return_value='/chrome'), patch('builtins.input', return_value=f'a:dummy-password:{SECRET}:d:e'), patch.object(app, 'launch', side_effect=RuntimeError('dummy-password')), patch('builtins.print') as output:
+        with patch.object(app.sys, 'argv', ['script']), patch.object(app, 'find_edge', return_value='/edge'), patch('builtins.input', return_value=f'a:dummy-password:{SECRET}:d:e'), patch.object(app, 'launch', side_effect=RuntimeError('dummy-password')), patch('builtins.print') as output:
             self.assertEqual(app.main(), 1)
             self.assertNotIn('dummy-password', str(output.call_args_list))
 

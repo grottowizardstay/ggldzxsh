@@ -1,9 +1,9 @@
 """Browser smoke check using synthetic credentials; never submits the login form."""
-from test_isolated_chrome import app
+from test_isolated_edge import app
 from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
-    browser = p.chromium.launch(executable_path=app.find_chrome(), headless=True)
+    browser = p.chromium.launch(executable_path=app.find_edge(), headless=True, args=['--inprivate'])
     context = browser.new_context()
     page = context.new_page()
     page.goto('https://github.com/login', wait_until='domcontentloaded')
@@ -22,10 +22,10 @@ print('PASS: real GitHub form filled without submission; separate context has no
 # All requests in this flow are intercepted; no credentials are sent to GitHub.
 from urllib.parse import parse_qs
 from unittest.mock import patch
-from test_isolated_chrome import SECRET
+from test_isolated_edge import SECRET
 
 with sync_playwright() as p:
-    browser = p.chromium.launch(executable_path=app.find_chrome(), headless=True)
+    browser = p.chromium.launch(executable_path=app.find_edge(), headless=True, args=['--inprivate'])
     context = browser.new_context()
     submissions = []
     def route_request(route):

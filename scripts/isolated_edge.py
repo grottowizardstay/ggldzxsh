@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Open login tabs in a disposable Chrome profile. Requires Python 3.10+."""
+"""Open login tabs in an isolated Microsoft Edge InPrivate session."""
 
 import argparse
 import base64
@@ -36,30 +36,30 @@ def parse_record(record):
     return fields[0].strip(), fields[1], secret
 
 
-def find_chrome(override=None):
+def find_edge(override=None):
     if override:
         path = Path(override).expanduser()
         if path.is_file():
             return str(path.resolve())
-        raise FileNotFoundError('The supplied Chrome executable does not exist.')
+        raise FileNotFoundError('The supplied Edge executable does not exist.')
     candidates = []
     if sys.platform == 'win32':
         for key in ('PROGRAMFILES', 'PROGRAMFILES(X86)', 'LOCALAPPDATA'):
             if os.environ.get(key):
-                candidates.append(Path(os.environ[key]) / 'Google/Chrome/Application/chrome.exe')
+                candidates.append(Path(os.environ[key]) / 'Microsoft/Edge/Application/msedge.exe')
     elif sys.platform == 'darwin':
         candidates = [
-            Path('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'),
-            Path.home() / 'Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+            Path('/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge'),
+            Path.home() / 'Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
         ]
     for path in candidates:
         if path.is_file():
             return str(path)
-    for name in ('google-chrome', 'google-chrome-stable', 'chrome', 'chromium', 'chromium-browser'):
+    for name in ('microsoft-edge', 'microsoft-edge-stable', 'msedge'):
         found = shutil.which(name)
         if found:
             return found
-    raise FileNotFoundError('Chrome was not found. Use --chrome with its executable path.')
+    raise FileNotFoundError('Edge was not found. Use --edge with its executable path.')
 
 
 def fill_github(page, login, password):
@@ -130,7 +130,7 @@ def advance_login(page, secret, state):
                 field.dispatchEvent(new Event('input', {bubbles: true}));
                 form.requestSubmit();
             }""", totp_code(secret))
-            print('Submitted an authenticator code. Complete any additional verification in Chrome.')
+            print('Submitted an authenticator code. Complete any additional verification in Edge.')
             return
     signed_in = any(cookie['name'] == 'logged_in' and cookie['value'] == 'yes'
                     for cookie in page.context.cookies(['https://github.com']))
@@ -164,7 +164,7 @@ def prepare_hoplite(page, state):
     print('Review any GitHub authorization request yourself; no permissions are approved automatically.')
 
 
-def launch(chrome, secret, login, password):
+def launch(edge, secret, login, password):
     try:
         from playwright.sync_api import sync_playwright, Error
     except ImportError:
@@ -173,8 +173,8 @@ def launch(chrome, secret, login, password):
     with sync_playwright() as playwright:
         # Playwright owns and cleans up a fresh temporary browser profile.
         browser = playwright.chromium.launch(
-            executable_path=chrome, headless=False,
-            args=['--disable-extensions', '--no-first-run', '--no-default-browser-check'],
+            executable_path=edge, headless=False,
+            args=['--inprivate', '--disable-extensions', '--no-first-run', '--no-default-browser-check'],
         )
         try:
             context = browser.new_context()
@@ -196,12 +196,12 @@ def launch(chrome, secret, login, password):
                 try:
                     page.goto(url, wait_until='domcontentloaded', timeout=30000)
                 except Error:
-                    print('One of the other tabs could not finish loading. Check it in Chrome.')
+                    print('One of the other tabs could not finish loading. Check it in Edge.')
             try:
                 github.bring_to_front()
             except Error:
                 pass
-            print('Keep this console open; close the new Chrome windows when done.')
+            print('Keep this console open; close the new Edge windows when done.')
             state = {}
             while browser.is_connected() and context.pages:
                 try:
@@ -223,10 +223,10 @@ def launch(chrome, secret, login, password):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--chrome', help='Path to the Chrome executable')
+    parser.add_argument('--edge', help='Path to the Edge executable')
     args = parser.parse_args()
     try:
-        chrome = find_chrome(args.chrome)
+        edge = find_edge(args.edge)
         print('Paste log:pass:2fa-key:recovery-codes:username/profile')
         print('Input is visible in this console. Fields cannot contain colons.')
         print('The 2FA key will be sent to 2fa.fb.tools in its URL; no further confirmation.')
@@ -236,7 +236,7 @@ def main():
             login, password, secret = parse_record(record)
         finally:
             del record
-        return launch(chrome, secret, login, password)
+        return launch(edge, secret, login, password)
     except (EOFError, KeyboardInterrupt):
         print('\nCancelled.')
         return 1
@@ -245,7 +245,7 @@ def main():
         return 1
     except Exception:
         # Automation errors can contain input values; never echo their details.
-        print('Chrome automation failed. Check Chrome and the Playwright installation.')
+        print('Edge automation failed. Check Edge and the Playwright installation.')
         return 1
 
 
