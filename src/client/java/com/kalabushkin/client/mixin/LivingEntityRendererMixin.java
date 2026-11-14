@@ -1,6 +1,7 @@
 package com.kalabushkin.client.mixin;
 
 import com.kalabushkin.client.BeerAnimator;
+import com.kalabushkin.client.PhoneAnimator;
 import com.kalabushkin.client.FistBumpAnimator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
@@ -27,6 +28,7 @@ abstract class LivingEntityRendererMixin<T extends LivingEntity, M extends Entit
 			VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
 		FistBumpAnimator.apply(entity, model, tickDelta, matrices);
 		BeerAnimator.apply(entity, model, tickDelta);
+		PhoneAnimator.apply(entity, model);
 	}
 
 	@Inject(method = RENDER, at = @At("TAIL"))

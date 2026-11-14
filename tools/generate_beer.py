@@ -31,11 +31,10 @@ TOAST_FRAMES = 8
 
 # (y0, y1, [(width along x, depth along z), ...]) from the base to the neck.
 PROFILE = [
-    (0.0, 7.5, [(6, 2), (4, 4), (2, 6)]),
-    (7.5, 8.75, [(5, 3), (3, 5)]),
-    (8.75, 9.75, [(4, 2), (2, 4)]),
-    (9.75, 10.5, [(3, 1.6), (1.6, 3)]),
-    (10.5, 13.6, [(2.2, 2.2)]),
+    (0.0, 8.0, [(6, 4), (4, 6)]),
+    (8.0, 9.0, [(5, 3.4), (3.4, 5)]),
+    (9.0, 10.0, [(3.6, 2.4), (2.4, 3.6)]),
+    (10.0, 13.6, [(2.4, 2.4)]),
 ]
 LIP = (13.6, 14.1, 2.8)
 CAP = (14.1, 15.0, 3.0)
@@ -265,6 +264,21 @@ def bottle_elements(level):
     return elements
 
 
+HELD_SCALE = 0.6
+GRIP = 4 * HELD_SCALE       # from the model's centre down to where the hand grips the body
+
+
+def third_person(tip, lift, clink):
+    """In the hand's frame +y points out of the front of the arm and +z up the arm, so an angle of 90 stands
+    the bottle along the arm, cap towards the shoulder. The bottle is turned about the point it is gripped at."""
+    angle = 75 + 30 * tip - 120 * lift - 10 * clink
+    grip_y, grip_z = 1.9 + 1.7 * tip, 1.5 - 3.3 * tip
+    a = math.radians(angle)
+    return {"rotation": [r(angle), 180, 0],
+            "translation": [0, r(grip_y + GRIP * math.cos(a)), r(grip_z + GRIP * math.sin(a))],
+            "scale": [HELD_SCALE] * 3}
+
+
 def display(drink=0.0, toast=0.0):
     """Hand transforms. drink tips the bottle up to the mouth; toast lifts it and knocks it forwards."""
     tip = lerp_keys([(0, 0), (0.25, 1), (0.85, 1), (1, 0)], drink)
@@ -272,11 +286,10 @@ def display(drink=0.0, toast=0.0):
     # The clink: a quick jab forwards and back while the bottle is up.
     clink = math.sin(max(0.0, min(1.0, (toast - 0.3) / 0.3)) * math.pi)
     return {
-        "thirdperson_righthand": {"rotation": [r(-80 + 200 * tip + 95 * lift - 25 * clink), 0, 0],
-                                  "translation": [0, r(1.5 + 1.5 * lift), r(-1.0)], "scale": [0.8] * 3},
-        "firstperson_righthand": {"rotation": [r(-25 * clink), 0, r(78 * tip + 12 * lift)],
-                                  "translation": [r(1.13 - 3.0 * lift), r(3.6 + 3.0 * lift), r(1.13 - 2.5 * clink)],
-                                  "scale": [0.5] * 3},
+        "thirdperson_righthand": third_person(tip, lift, clink),
+        "firstperson_righthand": {"rotation": [r(-25 * clink), 20, r(78 * tip + 12 * lift)],
+                                  "translation": [r(1.13 - 3.0 * lift), r(4.2 + 2.0 * lift), r(1.13 - 2.5 * clink)],
+                                  "scale": [0.45] * 3},
         "gui": {"rotation": [12, 28, 0], "translation": [0, 0.5, 0], "scale": [1.02] * 3},
         "ground": {"translation": [0, 2, 0], "scale": [0.5] * 3},
         "fixed": {"translation": [0, 0.5, 0], "scale": [1.0] * 3},

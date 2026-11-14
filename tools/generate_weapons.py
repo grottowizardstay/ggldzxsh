@@ -287,10 +287,17 @@ def held_display(gui_rotation, gui_scale):
     }
 
 
-def write_static_model(name, texture, elements, display):
+def write_static_model(name, texture, elements, display, variants=None):
+    """variants maps a predicate name to the display the item switches to while that predicate is 1."""
     texture.save(f"{ASSETS}/textures/item/{name}.png")
     model = {"textures": {"0": f"kalabushkin:item/{name}", "particle": f"kalabushkin:item/{name}"},
              "elements": elements, "display": display}
+    for predicate, variant_display in (variants or {}).items():
+        variant = dict(model, display=dict(display, **variant_display))
+        with open(f"{ASSETS}/models/item/{name}_{predicate}.json", "w") as f:
+            json.dump(variant, f, separators=(",", ":"))
+        model.setdefault("overrides", []).append({"predicate": {f"kalabushkin:{predicate}": 1},
+                                                  "model": f"kalabushkin:item/{name}_{predicate}"})
     with open(f"{ASSETS}/models/item/{name}.json", "w") as f:
         json.dump(model, f, separators=(",", ":"))
 
@@ -387,7 +394,12 @@ def diamond_phone_model():
                                              "west": side, "up": [11, 0, 16, 1], "down": [11, 0, 16, 1]}),
         box([6.2, 10.8, 8.5], [7.8, 12.4, 8.8], all_faces([12, 12, 13, 13])),  # camera bump
     ]
-    write_static_model("diamond_phone", texture, elements, held_display([15, -25, 0], 1.3))
+    # While it fires gifts the phone is held upright at arm's length, screen towards its owner.
+    firing = {
+        "thirdperson_righthand": {"rotation": [0, 180, 0], "translation": [0, 2.5, -0.6], "scale": [0.85] * 3},
+        "firstperson_righthand": {"rotation": [0, 170, 0], "translation": [-1.5, 5.0, 0], "scale": [0.7] * 3},
+    }
+    write_static_model("diamond_phone", texture, elements, held_display([15, -25, 0], 1.3), {"firing": firing})
 
 
 def main():

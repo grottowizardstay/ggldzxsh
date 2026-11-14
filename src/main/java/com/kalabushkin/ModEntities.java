@@ -2,6 +2,7 @@ package com.kalabushkin;
 
 import com.kalabushkin.entity.AlexeyEntity;
 import com.kalabushkin.entity.BarsikEntity;
+import com.kalabushkin.entity.GiftEntity;
 import com.kalabushkin.entity.KalabushkinEntity;
 import com.kalabushkin.entity.KalabushkinSpiritEntity;
 import com.kalabushkin.entity.LittleKochEntity;
@@ -21,6 +22,15 @@ import net.minecraft.world.Heightmap;
 import net.minecraft.world.biome.BiomeKeys;
 
 public final class ModEntities {
+	public static final EntityType<GiftEntity> GIFT = Registry.register(
+			Registries.ENTITY_TYPE,
+			Kalabushkin.id("gift"),
+			EntityType.Builder.<GiftEntity>create(GiftEntity::new, SpawnGroup.MISC)
+					.dimensions(0.3f, 0.3f)
+					.maxTrackingRange(4)
+					.trackingTickInterval(10)
+					.build());
+
 	public static final EntityType<KalabushkinEntity> KALABUSHKIN = Registry.register(
 			Registries.ENTITY_TYPE,
 			Kalabushkin.id("kalabushkin"),

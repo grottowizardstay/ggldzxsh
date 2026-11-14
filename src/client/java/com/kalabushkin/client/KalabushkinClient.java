@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.ClampedModelPredicateProvider;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
+import net.minecraft.client.render.entity.FlyingItemEntityRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Hand;
 
@@ -37,6 +38,7 @@ public class KalabushkinClient implements ClientModInitializer {
 		EntityRendererRegistry.register(ModEntities.BARSIK, BarsikRenderer::new);
 		EntityRendererRegistry.register(ModEntities.ALEXEY_SRPAVA, AlexeyRenderer::new);
 		EntityRendererRegistry.register(ModEntities.RITA, RitaRenderer::new);
+		EntityRendererRegistry.register(ModEntities.GIFT, context -> new FlyingItemEntityRenderer<>(context, 1.25f, true));
 		TripVisuals.init();
 		DrunkVisuals.init();
 
@@ -72,6 +74,8 @@ public class KalabushkinClient implements ClientModInitializer {
 				(stack, world, entity, seed) -> entity == null || entity.getMainHandStack() != stack
 						&& entity.getOffHandStack() != stack ? 0.0f : BeerAnimator.toastProgress(entity,
 						MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(true)));
+		ModelPredicateProviderRegistry.register(ModItems.DIAMOND_PHONE, Kalabushkin.id("firing"),
+				(stack, world, entity, seed) -> PhoneAnimator.isFiring(stack, entity) ? 1.0f : 0.0f);
 		BeerItem.toastPrompt = hand -> MinecraftClient.getInstance().setScreen(new ToastScreen());
 		ClientPlayNetworking.registerGlobalReceiver(RaiseBottlePayload.ID, (payload, context) -> {
 			Entity entity = context.client().world == null ? null : context.client().world.getEntityById(payload.entityId());
