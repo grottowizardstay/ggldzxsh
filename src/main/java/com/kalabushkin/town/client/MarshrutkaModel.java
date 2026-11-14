@@ -11,8 +11,9 @@ import net.minecraft.client.model.TexturedModelData;
 import net.minecraft.util.math.MathHelper;
 
 /**
- * The minibus, 34 px wide and 88 px long, front towards -Z. Heights below are given from the
- * ground up; {@link #box} converts them to model space, where Y points down and the ground is at 24.
+ * A high-roof Peugeot Boxer minibus, 34 px wide and 96 px long, front towards -Z. Heights below
+ * are given from the ground up; {@link #box} converts them to model space, where Y points down
+ * and the ground is at 24.
  *
  * <p>The UV origins match the atlas drawn by tools/gen_town_textures.py.
  */
@@ -22,12 +23,14 @@ public class MarshrutkaModel {
 	private static final float DOOR_TRAVEL = 19.0f;
 
 	private final ModelPart root;
+	private final ModelPart body;
 	private final ModelPart door;
 	private final ModelPart[] wheels = new ModelPart[WHEELS.length];
 
 	public MarshrutkaModel() {
 		root = createModelData().createModel();
-		door = root.getChild("door");
+		body = root.getChild("body");
+		door = body.getChild("door");
 		for (int i = 0; i < WHEELS.length; i++) {
 			wheels[i] = root.getChild(WHEELS[i]);
 		}
@@ -46,39 +49,46 @@ public class MarshrutkaModel {
 		ModelData data = new ModelData();
 		ModelPartData root = data.getRoot();
 
-		ModelPartBuilder body = ModelPartBuilder.create();
-		box(body, 0, 0, -17, 21, -22, 34, 19, 66);      // cabin with the windows
-		box(body, 0, 88, -17, 5, -22, 34, 16, 66);      // lower body
-		box(body, 204, 0, -17, 5, -44, 34, 16, 22);     // bonnet
-		box(body, 204, 92, -18, 3, -46, 36, 7, 3);      // front bumper
-		box(body, 204, 92, -18, 3, 43, 36, 7, 3);       // rear bumper
-		box(body, 204, 130, -8, 40, -22, 16, 6, 2);     // route sign on the roof
-		box(body, 260, 104, -7, 40, 4, 14, 1, 14);      // roof hatch
-		box(body, 240, 104, -20, 24, -30, 3, 6, 2);     // mirrors
-		box(body, 240, 104, 17, 24, -30, 3, 6, 2);
-		// Stepped panels closing the gap between the slanted windscreen and the cabin.
+		ModelPartBuilder shell = ModelPartBuilder.create();
+		box(shell, 0, 0, -17, 4, -24, 34, 39, 70);       // cab and saloon up to the high roof
+		box(shell, 0, 112, -17, 4, -46, 34, 15, 22);     // nose
+		box(shell, 0, 152, -18, 3, -48, 36, 8, 3);       // front bumper with the grille
+		box(shell, 0, 168, -18, 4, 46, 36, 5, 2);        // rear bumper
+		box(shell, 212, 36, -17, 19, -42, 34, 2, 18);    // steps filling in under the sloping bonnet
+		box(shell, 212, 58, -17, 21, -38, 34, 2, 14);
+		box(shell, 212, 76, -17, 37, -28, 34, 4, 4);     // roof brow over the windscreen
+		box(shell, 212, 86, -17, 41, -26, 34, 2, 2);
+		box(shell, 320, 44, -8, 43, 2, 16, 2, 14);       // roof hatch
+		box(shell, 320, 28, -20, 23, -29, 3, 8, 3);      // mirrors
+		box(shell, 320, 28, 17, 23, -29, 3, 8, 3);
+		// Stepped quarter windows closing the gap between the slanted windscreen and the cab doors.
 		for (float x : new float[] {-17.0f, 16.0f}) {
-			box(body, 204, 70, x, 21, -34, 1, 6, 12);
-			box(body, 236, 70, x, 27, -29, 1, 7, 7);
-			box(body, 258, 70, x, 34, -25, 1, 6, 3);
+			box(shell, 212, 92, x, 23, -36, 1, 4, 12);
+			box(shell, 240, 92, x, 27, -33, 1, 3, 9);
+			box(shell, 262, 92, x, 30, -30, 1, 4, 6);
+			box(shell, 278, 92, x, 34, -28, 1, 3, 4);
 		}
-		root.addChild("body", body, ModelTransform.NONE);
+		ModelPartData body = root.addChild("body", shell, ModelTransform.NONE);
 
-		// Hinged at the back edge of the bonnet and leaning back to the roof.
-		root.addChild("windscreen", ModelPartBuilder.create().uv(204, 40).cuboid(-16.0f, -24.0f, -1.0f, 32.0f, 24.0f, 2.0f),
-				ModelTransform.of(0.0f, 3.0f, -38.0f, -0.7f, 0.0f, 0.0f));
-
-		root.addChild("door", ModelPartBuilder.create().uv(320, 0).cuboid(-0.5f, -12.0f, -6.0f, 1.0f, 30.0f, 20.0f),
+		// Rises from the top of the grille to the foot of the windscreen.
+		body.addChild("bonnet", ModelPartBuilder.create().uv(212, 24).cuboid(-17.0f, -1.0f, 0.0f, 34.0f, 1.0f, 9.0f),
+				ModelTransform.of(0.0f, 5.0f, -46.0f, 0.4636f, 0.0f, 0.0f));
+		// Hinged at the back edge of the bonnet and leaning back to the roof brow.
+		body.addChild("windscreen", ModelPartBuilder.create().uv(212, 0).cuboid(-16.0f, -18.0f, -1.0f, 32.0f, 18.0f, 2.0f),
+				ModelTransform.of(0.0f, 1.0f, -38.0f, -0.6435f, 0.0f, 0.0f));
+		body.addChild("aerial", ModelPartBuilder.create().uv(340, 28).cuboid(-0.25f, -9.0f, -0.25f, 0.5f, 9.0f, 0.5f),
+				ModelTransform.of(-7.0f, -19.0f, -20.0f, -0.5f, 0.0f, 0.0f));
+		body.addChild("door", ModelPartBuilder.create().uv(390, 0).cuboid(-0.5f, -16.0f, -7.0f, 1.0f, 34.0f, 18.0f),
 				ModelTransform.pivot(DOOR_X, 0.0f, 0.0f));
 
-		float[][] axles = {{-15.5f, -30.0f}, {15.5f, -30.0f}, {-15.5f, 28.0f}, {15.5f, 28.0f}};
+		float[][] axles = {{-15.5f, -32.0f}, {15.5f, -32.0f}, {-15.5f, 25.0f}, {15.5f, 25.0f}};
 		for (int i = 0; i < WHEELS.length; i++) {
 			ModelPartData wheel = root.addChild(WHEELS[i],
-					ModelPartBuilder.create().uv(204, 104).cuboid(-2.0f, -6.0f, -6.0f, 4.0f, 12.0f, 12.0f),
+					ModelPartBuilder.create().uv(320, 0).cuboid(-2.0f, -6.0f, -6.0f, 4.0f, 12.0f, 12.0f),
 					ModelTransform.pivot(axles[i][0], 18.0f, axles[i][1]));
 			// Two more copies, turned 30 and 60 degrees, round the tyre off into a twelve-sided wheel.
 			for (int turn = 1; turn <= 2; turn++) {
-				wheel.addChild("tread_" + turn, ModelPartBuilder.create().uv(204, 104).cuboid(-2.0f + 0.05f * turn, -6.0f, -6.0f, 4.0f - 0.1f * turn, 12.0f, 12.0f),
+				wheel.addChild("tread_" + turn, ModelPartBuilder.create().uv(320, 0).cuboid(-2.0f + 0.05f * turn, -6.0f, -6.0f, 4.0f - 0.1f * turn, 12.0f, 12.0f),
 						ModelTransform.rotation(turn * MathHelper.PI / 6.0f, 0.0f, 0.0f));
 			}
 		}
@@ -97,10 +107,6 @@ public class MarshrutkaModel {
 
 		// Idling engine shake while parked, a soft bounce on the suspension while driving.
 		float time = entity.age + tickDelta;
-		ModelPart body = root.getChild("body");
-		float lift = entity.isStopped() ? MathHelper.sin(time * 2.4f) * 0.05f : MathHelper.sin(time * 0.9f) * 0.25f;
-		for (ModelPart part : new ModelPart[] {body, root.getChild("windscreen"), door}) {
-			part.pivotY = part == root.getChild("windscreen") ? 3.0f + lift : lift;
-		}
+		body.pivotY = entity.isStopped() ? MathHelper.sin(time * 2.4f) * 0.05f : MathHelper.sin(time * 0.9f) * 0.25f;
 	}
 }
