@@ -7,6 +7,7 @@ root side by side. `stubs/support/` stands in for the application headers they i
 make                 # mingw-w64 cross-build; see the Makefile for the MSVC commands
 bench.exe [frames]   # FrameProcessor, default 300 frames per row
 hid_bench.exe        # HidInput
+detector_bench.exe   # ObjectDetector decoding, 80 classes; detector_bench_1class.exe for one class
 ```
 
 Run them on the target machine: the reference numbers below come from Wine on 2 shared vCPUs with
@@ -59,3 +60,26 @@ Range over three runs:
 
 The blocking calls behave as before. A queued call costs tens of microseconds when it has to wake
 the sender thread, most of it the wake-up itself under Wine.
+
+## ObjectDetector (`detector_bench.exe`, `detector_bench_1class.exe`)
+
+Only decoding and suppression run, on synthetic model outputs; no model or backend is loaded.
+`stubs/support/` supplies inert stand-ins for the backend, the WinML types and the application
+constants. The class count and the single decoded class are compile-time constants there, so there
+are two builds: an 80-class model decoding every class, and a single-class model. Every case checks
+that the new decoder's detections are byte-identical to the baseline's, including inputs seeded
+with NaN, infinite and out-of-range values.
+
+Median decode time, 300 decodes, three runs (values repeat to within 2%):
+
+| 80 classes, all decoded | baseline | new | |
+|---|---|---|---|
+| no objectness, `[C,A]` 84×8400, conf 0.25 | 585–591 µs | 148–149 µs | 4.0× |
+| no objectness, `[A,C]` 8400×84, conf 0.25 | 573 µs | 151 µs | 3.8× |
+| same, conf 0.05 (nearly every anchor passes) | 707–718 µs | 465–492 µs | 1.5× |
+| objectness, `[C,A]` 85×25200, conf 0.25 | 59 µs | 66 µs | 0.89× |
+| objectness, `[A,C]` 25200×85, conf 0.25 | 63–88 µs | 60–84 µs | 1.05× |
+| built-in NMS, `[300,6]` | 29 µs | 29 µs | 1.0× |
+
+With a single class (`detector_bench_1class.exe`) the changed code is not reached and every case is
+within 1% of the baseline, apart from run-to-run noise of up to 10% in one malformed-input case.
