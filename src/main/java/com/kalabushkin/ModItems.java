@@ -1,5 +1,6 @@
 package com.kalabushkin;
 
+import com.kalabushkin.item.BeerItem;
 import com.kalabushkin.item.CarpenterWeaponItem;
 import com.kalabushkin.item.NicotineItem;
 import com.kalabushkin.item.ShatuniItem;
@@ -50,6 +51,7 @@ public final class ModItems {
 	public static final Item VAPE = nicotineItem(NicotineItem.Kind.VAPE);
 	public static final Item CIGARETTE = nicotineItem(NicotineItem.Kind.CIGARETTE);
 	public static final Item DYADKOVO_CIGARETTE = nicotineItem(NicotineItem.Kind.DYADKOVO_CIGARETTE);
+	public static final Item STARY_MELNIK = register("stary_melnik", new BeerItem(new Item.Settings()));
 
 	public static final ItemGroup GROUP = Registry.register(Registries.ITEM_GROUP, Kalabushkin.id("main"),
 			FabricItemGroup.builder()
@@ -72,6 +74,7 @@ public final class ModItems {
 						entries.add(CIGARETTE);
 						entries.add(DYADKOVO_CIGARETTE);
 						entries.add(DIAMOND_PHONE);
+						entries.add(STARY_MELNIK);
 					})
 					.build());
 
@@ -106,7 +109,10 @@ public final class ModItems {
 					entries.add(ALEXEY_SRPAVA_SPAWN_EGG);
 					entries.add(RITA_SPAWN_EGG);
 				});
-		ItemGroupEvents.modifyEntriesEvent(ItemGroups.FOOD_AND_DRINK).register(entries -> entries.add(FAT));
+		ItemGroupEvents.modifyEntriesEvent(ItemGroups.FOOD_AND_DRINK).register(entries -> {
+			entries.add(FAT);
+			entries.add(STARY_MELNIK);
+		});
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(entries -> {
 			entries.add(CARPENTER_PLANE);
 			entries.add(WOODEN_MALLET);

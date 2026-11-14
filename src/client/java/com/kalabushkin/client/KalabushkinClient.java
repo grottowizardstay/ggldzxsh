@@ -3,7 +3,9 @@ package com.kalabushkin.client;
 import com.kalabushkin.Kalabushkin;
 import com.kalabushkin.ModEntities;
 import com.kalabushkin.ModItems;
+import com.kalabushkin.item.BeerItem;
 import com.kalabushkin.network.FistBumpPayload;
+import com.kalabushkin.network.RaiseBottlePayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
@@ -36,6 +38,7 @@ public class KalabushkinClient implements ClientModInitializer {
 		EntityRendererRegistry.register(ModEntities.ALEXEY_SRPAVA, AlexeyRenderer::new);
 		EntityRendererRegistry.register(ModEntities.RITA, RitaRenderer::new);
 		TripVisuals.init();
+		DrunkVisuals.init();
 
 		// Drives the weapons' swing animation: item model overrides pick a frame from this value.
 		ClampedModelPredicateProvider swing = (stack, world, entity, seed) -> {
@@ -59,6 +62,23 @@ public class KalabushkinClient implements ClientModInitializer {
 		};
 		ModelPredicateProviderRegistry.register(ModItems.SHATUNI, Kalabushkin.id("spin"), spin);
 
+		// The bottle's models: how full it is, the sip being taken and the toast being raised.
+		ModelPredicateProviderRegistry.register(ModItems.STARY_MELNIK, Kalabushkin.id("level"),
+				(stack, world, entity, seed) -> BeerAnimator.level(stack));
+		ModelPredicateProviderRegistry.register(ModItems.STARY_MELNIK, Kalabushkin.id("drink"),
+				(stack, world, entity, seed) -> BeerAnimator.drinkProgress(stack, entity,
+						MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(true)));
+		ModelPredicateProviderRegistry.register(ModItems.STARY_MELNIK, Kalabushkin.id("toast"),
+				(stack, world, entity, seed) -> entity == null || entity.getMainHandStack() != stack
+						&& entity.getOffHandStack() != stack ? 0.0f : BeerAnimator.toastProgress(entity,
+						MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(true)));
+		BeerItem.toastPrompt = hand -> MinecraftClient.getInstance().setScreen(new ToastScreen());
+		ClientPlayNetworking.registerGlobalReceiver(RaiseBottlePayload.ID, (payload, context) -> {
+			Entity entity = context.client().world == null ? null : context.client().world.getEntityById(payload.entityId());
+			if (entity != null) {
+				BeerAnimator.startToast(entity);
+			}
+		});
 		ClientPlayNetworking.registerGlobalReceiver(FistBumpPayload.ID, (payload, context) -> {
 			Entity entity = context.client().world == null ? null : context.client().world.getEntityById(payload.entityId());
 			if (entity != null) {

@@ -1,5 +1,6 @@
 package com.kalabushkin.client.mixin;
 
+import com.kalabushkin.client.BeerAnimator;
 import com.kalabushkin.client.FistBumpAnimator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
@@ -25,6 +26,7 @@ abstract class LivingEntityRendererMixin<T extends LivingEntity, M extends Entit
 	private void kalabushkin$poseFistBump(T entity, float yaw, float tickDelta, MatrixStack matrices,
 			VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
 		FistBumpAnimator.apply(entity, model, tickDelta, matrices);
+		BeerAnimator.apply(entity, model, tickDelta);
 	}
 
 	@Inject(method = RENDER, at = @At("TAIL"))

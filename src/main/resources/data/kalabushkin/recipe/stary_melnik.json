@@ -1,0 +1,25 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"category": "food",
+	"ingredients": [
+		{
+			"item": "minecraft:glass_bottle"
+		},
+		{
+			"item": "minecraft:wheat"
+		},
+		{
+			"item": "minecraft:wheat"
+		},
+		{
+			"item": "minecraft:wheat"
+		},
+		{
+			"item": "minecraft:sugar"
+		}
+	],
+	"result": {
+		"id": "kalabushkin:stary_melnik",
+		"count": 1
+	}
+}

@@ -1,5 +1,6 @@
 package com.kalabushkin;
 
+import com.kalabushkin.item.Toasts;
 import com.kalabushkin.network.FistBumpPayload;
 import com.kalabushkin.spirit.SpiritManager;
 import net.fabricmc.api.ModInitializer;
@@ -20,5 +21,6 @@ public class Kalabushkin implements ModInitializer {
 		ModItems.init();
 		SpiritManager.init();
 		PayloadTypeRegistry.playS2C().register(FistBumpPayload.ID, FistBumpPayload.CODEC);
+		Toasts.init();
 	}
 }

@@ -7,3 +7,4 @@ out/
 .vscode/
 .hoplite/
 logs/
+__pycache__/

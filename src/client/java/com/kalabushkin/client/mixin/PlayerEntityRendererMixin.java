@@ -1,5 +1,6 @@
 package com.kalabushkin.client.mixin;
 
+import com.kalabushkin.item.BeerItem;
 import com.kalabushkin.item.ShatuniItem;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
@@ -19,6 +20,10 @@ abstract class PlayerEntityRendererMixin {
 		if (hand == Hand.MAIN_HAND && player.getMainHandStack().getItem() instanceof ShatuniItem
 				&& player.getOffHandStack().isEmpty()) {
 			cir.setReturnValue(BipedEntityModel.ArmPose.CROSSBOW_HOLD);
+		}
+		// The horn pose lifts the hand to the mouth, which is where a bottle goes too.
+		if (player.isUsingItem() && player.getActiveHand() == hand && player.getActiveItem().getItem() instanceof BeerItem) {
+			cir.setReturnValue(BipedEntityModel.ArmPose.TOOT_HORN);
 		}
 	}
 }
