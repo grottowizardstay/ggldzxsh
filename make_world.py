@@ -28,6 +28,8 @@ srv.mkdir(parents=True)
 )
 cmds = (work / "commands.txt").read_text().split("\n")[:-1]
 model = json.loads((work / "model.json").read_text())
+meta = json.loads((work / "meta.json").read_text())
+xs, zs = [m[0] for m in model], [m[2] for m in model]
 
 log = open(work / "server.log", "w")
 p = subprocess.Popen(["java", "-Xmx3G", "-jar", str(jar), "nogui"], cwd=srv, stdin=subprocess.PIPE,
@@ -48,12 +50,12 @@ def send(*lines):
 
 
 wait_for("Done (")
-send("forceload add -24 -10 136 71", "gamerule doMobSpawning false", "gamerule doWeatherCycle false",
+send(f"forceload add {min(xs)} {min(zs)} {max(xs)} {max(zs)}", "gamerule doMobSpawning false", "gamerule doWeatherCycle false",
      "gamerule spawnRadius 0", "weather clear", "say CHUNKS_REQUESTED")
 wait_for("CHUNKS_REQUESTED")
 time.sleep(15)
 send(*cmds)
-send("forceload remove all", "setworldspawn 120 -60 62 135", "time set 1000", "save-all flush", "say BUILD_DONE")
+send("forceload remove all", "setworldspawn %d %d %d %d" % tuple(meta["spawn"]), "time set 1000", "save-all flush", "say BUILD_DONE")
 wait_for("BUILD_DONE")
 send("stop")
 for line in p.stdout:
@@ -97,16 +99,24 @@ def chunk_blocks(nbt):
     return out
 
 
+def chunks(folder):
+    for f in (world / folder).glob("*.mca"):
+        raw = f.read_bytes()
+        for i in range(1024 if raw else 0):
+            off = int.from_bytes(raw[i * 4:i * 4 + 3], "big") * 4096
+            if off:
+                n = int.from_bytes(raw[off:off + 4], "big")
+                body = raw[off + 5:off + 4 + n]
+                body = zlib.decompress(body) if raw[off + 4] == 2 else gzip.decompress(body)
+                yield nbtlib.File.parse(io.BytesIO(body))
+
+
 saved = {}
-for f in (world / "region").glob("*.mca"):
-    raw = f.read_bytes()
-    for i in range(1024):
-        off = int.from_bytes(raw[i * 4:i * 4 + 3], "big") * 4096
-        if off:
-            n = int.from_bytes(raw[off:off + 4], "big")
-            body = raw[off + 5:off + 4 + n]
-            body = zlib.decompress(body) if raw[off + 4] == 2 else gzip.decompress(body)
-            saved.update(chunk_blocks(nbtlib.File.parse(io.BytesIO(body))))
+for c in chunks("region"):
+    saved.update(chunk_blocks(c))
+signs = [e for c in chunks("entities") for e in c["Entities"] if e["id"] == "minecraft:text_display"]
+print("text displays saved:", len(signs), "of", meta["text_displays"],
+      "| texts:", sorted({json.loads(e["text"])["text"] for e in signs}))
 bad = []
 for x, y, z, b in model:
     name, _, props = b.partition("[")
@@ -115,13 +125,11 @@ for x, y, z, b in model:
     if not got or got["Name"] != "minecraft:" + name or any(str(got["Properties"][k]) != v for k, v in want.items()):
         bad.append((x, y, z, b, got and str(got["Name"])))
 print("model blocks:", len(model), "| mismatches in saved world:", len(bad), bad[:10])
-pane = saved[(4, -55, 46)]
-print("sample window pane state:", dict(pane["Properties"]))
 
 dest = work / NAME
 shutil.rmtree(dest, ignore_errors=True)
 shutil.copytree(world, dest)
 shutil.make_archive(str(work / "Muraveynik-Gym-world"), "zip", work, NAME)
 print("zip:", (work / "Muraveynik-Gym-world.zip").stat().st_size, "bytes")
-if bad or filled != len(model):
+if bad or filled != len(model) or len(signs) != meta["text_displays"]:
     sys.exit(1)
