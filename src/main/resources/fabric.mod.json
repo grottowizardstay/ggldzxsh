@@ -8,10 +8,12 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.kalabushkin.gym.GymMod"
+			"com.kalabushkin.gym.GymMod",
+			"com.kalabushkin.town.TownMod"
 		],
 		"client": [
-			"com.kalabushkin.gym.client.GymClient"
+			"com.kalabushkin.gym.client.GymClient",
+			"com.kalabushkin.town.client.TownClient"
 		]
 	},
 	"mixins": [

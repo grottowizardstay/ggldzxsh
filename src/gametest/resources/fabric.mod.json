@@ -5,6 +5,6 @@
 	"name": "Legends of Seltso gym tests",
 	"environment": "*",
 	"entrypoints": {
-		"fabric-gametest": ["com.kalabushkin.gym.test.GymGameTest"]
+		"fabric-gametest": ["com.kalabushkin.gym.test.GymGameTest", "com.kalabushkin.town.test.TownGameTest"]
 	}
 }

@@ -25,5 +25,19 @@
 	"gym.kalabushkin.stats.line": "%s: %s кг (повтор %s/%s)",
 	"gym.kalabushkin.stats.strength": "Уровень силы %s: +%s к урону",
 	"gym.kalabushkin.bench_hint": "Используй штангу, чтобы жать. Присядь, чтобы встать.",
-	"gym.kalabushkin.bench_taken": "Эта скамья уже занята"
+	"gym.kalabushkin.bench_taken": "Эта скамья уже занята",
+	"entity.kalabushkin.romich": "Ромыч",
+	"entity.kalabushkin.romich.treat.0": "Ромыч: На, держи пиво. Угощаю.",
+	"entity.kalabushkin.romich.treat.1": "Ромыч: Бери «Старый мельник», не стесняйся.",
+	"entity.kalabushkin.romich.treat.2": "Ромыч: Рад тебя видеть! Это бесплатно.",
+	"entity.kalabushkin.romich.trade": "Ромыч: Пиво или сигарету? Одна золотая монета.",
+	"entity.kalabushkin.marshrutka": "Маршрутка 161",
+	"entity.kalabushkin.marshrutka.route": "Маршрут %s: до соседней деревни %s блоков. Используй маршрутку, чтобы сесть.",
+	"entity.kalabushkin.marshrutka.no_village": "Маршрут %s: другой деревни поблизости нет, маршрутка остаётся на месте.",
+	"entity.kalabushkin.marshrutka.departing": "Маршрут %s: двери закрываются, отправляемся.",
+	"entity.kalabushkin.marshrutka.stop": "Маршрут %s: остановка. Отправление через %s с.",
+	"item.kalabushkin.romich_spawn_egg": "Яйцо призыва Ромыча",
+	"item.kalabushkin.gold_coin": "Золотая монета",
+	"item.kalabushkin.marshrutka": "Маршрутка 161",
+	"item.kalabushkin.marshrutka.tooltip": "Поставь в деревне: она ездит до ближайшей соседней деревни и обратно"
 }

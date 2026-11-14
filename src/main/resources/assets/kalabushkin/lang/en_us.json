@@ -25,5 +25,19 @@
 	"gym.kalabushkin.stats.line": "%s: %s kg (rep %s/%s)",
 	"gym.kalabushkin.stats.strength": "Strength level %s: +%s attack damage",
 	"gym.kalabushkin.bench_hint": "Use the barbell to press. Sneak to get up.",
-	"gym.kalabushkin.bench_taken": "Someone is already on this bench"
+	"gym.kalabushkin.bench_taken": "Someone is already on this bench",
+	"entity.kalabushkin.romich": "Romich",
+	"entity.kalabushkin.romich.treat.0": "Romich: Here, have a beer. On me.",
+	"entity.kalabushkin.romich.treat.1": "Romich: Take a Stary Melnik, don't be shy.",
+	"entity.kalabushkin.romich.treat.2": "Romich: Good to see you! This one is free.",
+	"entity.kalabushkin.romich.trade": "Romich: Beer or a smoke? One gold coin.",
+	"entity.kalabushkin.marshrutka": "Marshrutka 161",
+	"entity.kalabushkin.marshrutka.route": "Route %s: next village is %s blocks away. Use the bus to get in.",
+	"entity.kalabushkin.marshrutka.no_village": "Route %s: no other village within reach, the marshrutka stays parked.",
+	"entity.kalabushkin.marshrutka.departing": "Route %s: doors closing, we are leaving.",
+	"entity.kalabushkin.marshrutka.stop": "Route %s: stop. Leaving in %s seconds.",
+	"item.kalabushkin.romich_spawn_egg": "Romich Spawn Egg",
+	"item.kalabushkin.gold_coin": "Gold Coin",
+	"item.kalabushkin.marshrutka": "Marshrutka 161",
+	"item.kalabushkin.marshrutka.tooltip": "Park it in a village: it runs to the nearest other village and back"
 }
