@@ -10,7 +10,7 @@ import sys
 
 L, W = 31, 15           # footprint: x 0..L-1, z 0..W-1
 FLOORS = (0, 4, 8)      # floor-slab row of each storey; windows sit on rows f+2..f+3
-ROOF, PARAPET, CAP = 12, 13, 14
+ROOF, PARAPET, CAP = 14, 15, 16  # the top storey is a double-height hall
 Y0 = -60                # world y of row 0
 
 BRICK = "bricks"
@@ -46,7 +46,7 @@ for (x0, x1, z0, z1) in ((0, L - 1, W - 1, W - 1), (0, L - 1, 0, 0), (L - 1, L -
 box(1, 21, 0, 0, 1, W - 2, "gray_concrete")        # rubber gym floor
 box(22, L - 2, 0, 0, 1, W - 2, "smooth_stone")     # lobby
 box(1, L - 2, 4, 4, 1, W - 2, "spruce_planks")
-box(1, L - 2, 8, 8, 1, W - 2, "birch_planks")
+box(1, L - 2, 8, 8, 1, W - 2, "black_concrete")    # rubber floor of the top hall
 box(1, L - 2, ROOF, ROOF, 1, W - 2, "gray_concrete")
 
 
@@ -54,7 +54,8 @@ def window(cells, f, glazed=True):
     """cells: wall positions (x, z) of one opening on the storey whose floor row is f."""
     for (x, z) in cells:
         box(x, x, f + 2, f + 3, z, z, GLASS if glazed else INFILL)
-        put(x, f + 4, z, LINTEL)   # half-height lintel; the floor slab behind closes the gap
+        # Half-height lintel where a floor slab behind closes the gap; the top hall has none, so a full block.
+        put(x, f + 4, z, "smooth_quartz" if f == FLOORS[-1] else LINTEL)
 
 
 # long facades: 8 bays of 2-wide windows between 1-wide piers, then a blank end wall
@@ -62,7 +63,8 @@ for i in range(8):
     xs = (1 + 3 * i, 2 + 3 * i)
     for f in FLOORS:
         window([(x, W - 1) for x in xs], f, glazed=not (i == 6 and f == 8))  # one bricked-up opening
-        window([(x, 0) for x in xs], f)
+        if f < 8 or i < 3:   # the hall's north wall is blank inside, apart from the mezzanine end
+            window([(x, 0) for x in xs], f)
 for zs in ((3, 4), (10, 11)):
     for f in FLOORS:
         window([(0, z) for z in zs], f)
@@ -115,12 +117,12 @@ for z in (4, 7, 10):
 # vertical GYM: black letters standing off the wall over an orange halo
 GX = 28.0
 for i, ch in enumerate("GYM"):
-    y = Y0 + 9.5 - 2.6 * i
-    for dx, dy in ((-.12, 0), (.12, 0), (0, -.12), (0, .12)):
-        text(GX + dx, y + dy, W + 0.03, "z", ch, "#FF9A2E", 15, 12)
-    text(GX, y, W + 0.12, "z", ch, "black", 15, 12)
+    y = Y0 + 11.5 - 3 * i
+    for dx, dy in ((-.14, 0), (.14, 0), (0, -.14), (0, .14)):
+        text(GX + dx, y + dy, W + 0.03, "z", ch, "#FF9A2E", 17, 14)
+    text(GX, y, W + 0.12, "z", ch, "black", 17, 14)
     for x in (27, 28):
-        put(x, 10 - 3 * i, W, "light[level=12]")
+        put(x, 12 - 3 * i, W, "light[level=12]")
 
 
 # ---------------------------------------------------------------- interior
@@ -132,9 +134,10 @@ for f in (0, 4):
     box(26, 27, f + 4, f + 4, 1, 2, None)
 for f in FLOORS:
     box(25, 28, f + 1, f + 3, 3, 3, BRICK)
+box(25, 28, 12, 13, 3, 3, BRICK)
 box(28, 28, 9, 9, 1, 2, "iron_bars")   # guard rail above the top flight
 
-for f in FLOORS:                       # ceiling lights
+for f in FLOORS[:2]:                   # ceiling lights
     for x in (3, 7, 11, 15, 19):
         for z in (4, 10):
             put(x, f + 3, z, "lantern[hanging=true]")
@@ -172,11 +175,76 @@ for x in (14, 17, 20):
     box(x, x, 5, 5, 3, 4, "blackstone_slab[type=bottom]")
 box(13, 18, 5, 5, 13, 13, "anvil[facing=north]")
 
-# second floor: studio with mats
-MATS = ("lime_carpet", "light_blue_carpet", "magenta_carpet", "orange_carpet")
-for n, x in enumerate(range(3, 20, 3)):
-    for z0 in (4, 9):
-        box(x, x, 9, 9, z0, z0 + 1, MATS[(n + z0) % 4])
+# top floor: double-height hall (clear rows 9..13) split in two levels by a steel mezzanine at the west end
+SEAT = "blackstone_stairs[facing=%s,half=bottom]"
+DECK = "blackstone_slab[type=top]"
+BENCH = "blackstone_slab[type=bottom]"
+
+box(11, 23, 9, 10, 1, 1, "bamboo_planks")            # OSB wainscot on the north wall, grey paint above
+box(11, 23, 11, 13, 1, 1, "cyan_terracotta")
+for x in (13, 16, 19, 22):                           # black ceiling beams
+    box(x, x, 13, 13, 2, W - 2, DECK)
+for x in (14, 17, 20):                               # square light panels between them
+    for z in (4, 8, 11):
+        put(x, 13, z, "smooth_quartz_slab[type=top]")
+        put(x, 12, z, "light[level=15]")
+box(18, 18, 13, 13, 6, 7, "chain[axis=y]")           # TV hung from the ceiling, facing the entrance end
+box(18, 18, 12, 12, 6, 7, "black_stained_glass_pane")
+
+for x in (12, 15, 18, 21):                           # pull-up rig along the OSB wall
+    box(x, x, 9, 11, 3, 3, "polished_blackstone_wall")
+for x in (13, 14, 16, 17, 19, 20):
+    put(x, 11, 3, "chain[axis=x]")
+box(15, 15, 11, 13, 5, 6, "chain[axis=y]")           # gymnastic rings
+put(13, 9, 2, "polished_blackstone_slab[type=bottom]")   # bumper plate stacks
+put(14, 9, 2, "polished_blackstone")
+box(16, 17, 9, 9, 2, 2, "polished_blackstone_slab[type=bottom]")
+box(19, 20, 9, 9, 2, 2, "red_candle[candles=3,lit=false]")   # medicine balls
+
+for x in (14, 17, 20):                               # block of weight-stack machines, back to back
+    put(x, 9, 8, "iron_block")
+    put(x, 10, 8, "iron_bars")
+    put(x, 9, 7, SEAT % "south")
+    put(x, 9, 9, SEAT % "north")
+box(13, 14, 9, 9, 12, 12, BENCH)                     # bench, plate-loaded machine and plate tree by the windows
+put(17, 9, 12, SEAT % "south")
+put(17, 9, 13, "iron_bars")
+put(21, 9, 13, "andesite_wall")
+for x, c in ((20, "yellow"), (21, "lime"), (22, "light_blue")):
+    put(x, 9, 12, c + "_carpet")
+box(27, 28, 9, 9, 11, 11, "dark_oak_planks")         # desk at the entrance end
+put(28, 10, 11, "potted_fern")
+
+box(1, 10, 11, 11, 1, W - 2, DECK)                   # mezzanine deck: 2.5 clear below, 2 above
+box(10, 10, 12, 12, 1, W - 2, "iron_bars")           # railing along its edge
+box(10, 10, 12, 12, 2, 3, None)
+for k, z in enumerate((6, 5, 4)):                    # stair along the edge up to a landing
+    put(11, 9 + k, z, SEAT % "north")
+box(11, 11, 11, 11, 2, 3, DECK)
+box(12, 12, 12, 12, 2, 3, "iron_bars")
+
+box(1, 1, 9, 9, 6, 8, "anvil[facing=north]")         # under the mezzanine: free weights
+for z in (3, 7, 11):
+    box(3, 4, 9, 9, z, z, BENCH)
+for z in (5, 7):
+    box(7, 7, 9, 10, z, z, "iron_bars")
+put(7, 10, 6, "chain[axis=z]")
+for x, z in ((3, 5), (3, 9), (8, 10)):
+    put(x, 10, z, "light[level=13]")
+
+for x in (2, 4, 6):                                  # on the mezzanine: treadmills, bikes, machines, benches
+    box(x, x, 12, 12, 11, 12, "black_carpet")
+    put(x, 12, 13, "iron_bars")
+for z in (5, 7, 9):
+    put(8, 12, z, "grindstone[face=floor,facing=east]")
+for x in (3, 6):
+    put(x, 12, 6, "iron_block")
+    put(x, 13, 6, "iron_bars")
+    put(x, 12, 7, SEAT % "north")
+for x in (2, 6):
+    box(x, x + 1, 12, 12, 2, 2, BENCH)
+for x, z in ((3, 4), (3, 10), (7, 4), (7, 10), (24, 6), (26, 8), (26, 11)):
+    put(x, 13, z, "light[level=15]")
 
 # ---------------------------------------------------------------- facade and roof fittings
 for x, row in ((8, 5), (17, 5), (20, 5), (11, 9)):         # air conditioners under windows
@@ -186,13 +254,13 @@ for x in (21, 24):                                         # downpipes
 box(0, 18, 4, 4, W, W + 1, "light_gray_stained_glass")     # lean-to canopy along the long side
 for x in range(0, 19, 3):
     box(x, x, 0, 3, W + 1, W + 1, "iron_bars")
-box(28, 28, 13, 16, 12, 12, "iron_bars")                   # roof mast
-put(28, 17, 12, "lightning_rod[facing=up]")
+box(28, 28, ROOF + 1, ROOF + 4, 12, 12, "iron_bars")       # roof mast
+put(28, ROOF + 5, 12, "lightning_rod[facing=up]")
 for (x, z) in ((6, 4), (15, 9), (22, 5)):                  # vents
-    put(x, 13, z, "smooth_stone")
-    put(x, 14, z, "stone_brick_wall")
-box(26, 27, 13, 13, 1, 2, BRICK)                           # roof hatch
-box(26, 27, 14, 14, 1, 2, "stone_brick_slab[type=bottom]")
+    put(x, ROOF + 1, z, "smooth_stone")
+    put(x, ROOF + 2, z, "stone_brick_wall")
+box(26, 27, ROOF + 1, ROOF + 1, 1, 2, BRICK)               # roof hatch
+box(26, 27, ROOF + 2, ROOF + 2, 1, 2, "stone_brick_slab[type=bottom]")
 
 # ---------------------------------------------------------------- site
 X0, X1 = -8, L + 13
@@ -236,6 +304,13 @@ COLORS = {
     "purple_terracotta": (118, 70, 86), "podzol": (91, 63, 24), "gray_carpet": (63, 68, 72), "cauldron": (74, 74, 74),
     "spruce_planks": (115, 85, 49), "birch_planks": (192, 175, 121), "light_gray_stained_glass": (185, 190, 195),
     "lightning_rod": (190, 110, 80), "andesite_wall": (132, 135, 134), "pearlescent_froglight": (245, 235, 240),
+    "black_concrete": (20, 22, 26), "bamboo_planks": (200, 175, 85), "cyan_terracotta": (87, 92, 92),
+    "blackstone_slab": (42, 36, 41), "blackstone_stairs": (42, 36, 41), "polished_blackstone_wall": (53, 49, 57),
+    "polished_blackstone": (53, 49, 57), "polished_blackstone_slab": (53, 49, 57), "iron_block": (220, 220, 220),
+    "smooth_quartz": (236, 230, 223), "red_candle": (170, 40, 35), "yellow_carpet": (248, 198, 40),
+    "lime_carpet": (112, 185, 26), "light_blue_carpet": (58, 175, 217), "black_carpet": (30, 30, 34),
+    "red_carpet": (160, 39, 35), "anvil": (70, 70, 70), "grindstone": (140, 140, 140), "chain": (60, 66, 80),
+    "black_stained_glass_pane": (25, 25, 25),
 }
 
 
@@ -243,10 +318,11 @@ def color(b):
     return COLORS.get(b.split("[")[0], (90, 90, 90))
 
 
-def render(path, flip, s=14):
+def render(path, flip, s=14, keep=lambda x, y, z: True):
     """Isometric preview. flip=False looks from the south-east, True from the north-west."""
     from PIL import Image, ImageDraw
-    vox = {((L - 1 - x, y, W - 1 - z) if flip else (x, y, z)): b for (x, y, z), b in B.items() if "light[" not in b}
+    vox = {((L - 1 - x, y, W - 1 - z) if flip else (x, y, z)): b for (x, y, z), b in B.items()
+           if "light[" not in b and keep(x, y, z)}
 
     def proj(x, y, z):
         return ((x - z) * s, (x + z) * s // 2 - y * s)
@@ -314,7 +390,7 @@ def commands():
             else:
                 lst.append([y, y])
     # Blocks that need support or connect to neighbours go last.
-    fragile = ("door", "carpet", "lantern[", "pane", "iron_bars", "wall", "potted", "chain", "anvil", "light[")
+    fragile = ("door", "carpet", "lantern[", "pane", "iron_bars", "wall", "potted", "chain", "anvil", "light[", "candle", "grindstone")
     out = []
     for (x0, x1, z0, z1, b), ys in boxes.items():
         for y0, y1 in ys:
@@ -333,5 +409,7 @@ if __name__ == "__main__":
     print(len(B), "blocks,", len(cmds), "commands,", len(SUMMONS), "text displays")
     render(f"{out}/preview_se.png", False)
     render(f"{out}/preview_nw.png", True)
-    for n, f in enumerate(FLOORS):
-        plan(f"{out}/plan_{n}.png", f, f + 3)
+    # top hall with the roof, ceiling beams, south wall and east wall cut away
+    render(f"{out}/hall.png", False, 26, lambda x, y, z: 8 <= y <= 12 and z <= W - 2 and x <= L - 2)
+    plan(f"{out}/plan_hall.png", 8, 10, 28)
+    plan(f"{out}/plan_mezzanine.png", 8, 12, 28)
