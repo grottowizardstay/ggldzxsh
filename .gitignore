@@ -1,0 +1,10 @@
+.venv/
+.windows-build/
+__pycache__/
+.pytest_cache/
+build/
+dist/
+*.spec
+card.txt
+card.txt.lock
+.card-*
