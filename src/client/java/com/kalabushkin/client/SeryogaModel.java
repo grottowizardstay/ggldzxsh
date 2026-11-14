@@ -87,16 +87,16 @@ public class SeryogaModel extends SinglePartEntityModel<SeryogaEntity> {
 		getPart().traverse().forEach(ModelPart::resetTransform);
 		head.yaw = headYaw * MathHelper.RADIANS_PER_DEGREE;
 		head.pitch = headPitch * MathHelper.RADIANS_PER_DEGREE;
-		// In the air: knees tucked up in front, arms flung out and up.
-		rightLeg.pitch = -0.9f * air;
-		leftLeg.pitch = -0.5f * air;
-		rightLeg.roll = 0.12f * air;
-		leftLeg.roll = -0.12f * air;
-		rightArm.roll = 1.9f * air;
-		leftArm.roll = -1.9f * air;
-		rightArm.pitch = -0.3f * air;
-		leftArm.pitch = -0.3f * air;
-		waist.pitch = 0.12f * air;
+		// Off the ground: one knee lifted, toes trailing, arms floating a little away from his sides.
+		rightLeg.pitch = -0.45f * air;
+		leftLeg.pitch = 0.2f * air;
+		rightLeg.roll = 0.05f * air;
+		leftLeg.roll = -0.05f * air;
+		rightArm.roll = 0.45f * air;
+		leftArm.roll = -0.45f * air;
+		rightArm.pitch = 0.25f * air;
+		leftArm.pitch = -0.25f * air;
+		waist.pitch = 0.06f * air;
 		if (crouching) {
 			waist.pitch += 0.5f;
 			waist.pivotY += 2.0f;

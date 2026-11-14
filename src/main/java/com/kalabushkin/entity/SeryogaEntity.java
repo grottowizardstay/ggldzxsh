@@ -34,7 +34,7 @@ import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 
 /**
- * Very tall, and never walks anywhere: he gets about in hops, and every so often stops to strike a
+ * Very tall, with a springy walk: every step is a light hop, and every so often he stops to strike a
  * pose. A player who keeps heading his way gets noticed, and from then on he is that player's
  * mirror image for a while: he faces them and copies their steps, jumps, sneaking, swings and gaze.
  */
@@ -65,7 +65,10 @@ public class SeryogaEntity extends PathAwareEntity {
 	public float airAmount;
 	public float lastAirAmount;
 
+	private static final float LIGHT_HOP = 0.2f;
+
 	private int poseTicks;
+	private boolean fullJump;
 	private int poseCooldown;
 	private int noticeTicks;
 	private int mirrorTicks;
@@ -92,9 +95,9 @@ public class SeryogaEntity extends PathAwareEntity {
 	public static DefaultAttributeContainer.Builder createAttributes() {
 		return MobEntity.createMobAttributes()
 				.add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0)
-				.add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3)
-				.add(EntityAttributes.GENERIC_JUMP_STRENGTH, 0.46)
-				.add(EntityAttributes.GENERIC_SAFE_FALL_DISTANCE, 6.0);
+				.add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25)
+				.add(EntityAttributes.GENERIC_STEP_HEIGHT, 1.0)
+				.add(EntityAttributes.GENERIC_SAFE_FALL_DISTANCE, 4.0);
 	}
 
 	/** Natural spawns: lit, open-sky grass, and only one Seryoga per neighbourhood. */
@@ -145,14 +148,10 @@ public class SeryogaEntity extends PathAwareEntity {
 		return poseTicks > 0 || noticeTicks > 0 || mirrorTicks > 0;
 	}
 
-	// A hop carries him forwards as well as up.
+	// His own hops are light, a third of a block; only a copied jump is a real one.
 	@Override
-	public void jump() {
-		super.jump();
-		if (forwardSpeed > 0.0f) {
-			float yaw = getYaw() * MathHelper.RADIANS_PER_DEGREE;
-			addVelocity(-MathHelper.sin(yaw) * 0.2, 0.0, MathHelper.cos(yaw) * 0.2);
-		}
+	protected float getJumpVelocity() {
+		return fullJump ? super.getJumpVelocity() : LIGHT_HOP;
 	}
 
 	@Override
@@ -300,7 +299,9 @@ public class SeryogaEntity extends PathAwareEntity {
 
 		setCrouching(leader.isSneaking());
 		if (leaderWasOnGround && !leader.isOnGround() && leader.getVelocity().y >= 0.0 && isOnGround()) {
+			fullJump = true;
 			jump();
+			fullJump = false;
 		}
 		leaderWasOnGround = leader.isOnGround();
 		if (leader.handSwinging && !leaderWasSwinging) {
@@ -329,9 +330,8 @@ public class SeryogaEntity extends PathAwareEntity {
 		return 1.15f + random.nextFloat() * 0.1f;
 	}
 
-	/** Like a slime's: turns towards where he is going and gets there one hop at a time. */
+	/** Keeps walking the whole time and pushes off into a light hop whenever a foot is down. */
 	private class HopControl extends MoveControl {
-		private int groundTicks;
 
 		HopControl() {
 			super(SeryogaEntity.this);
@@ -353,14 +353,9 @@ public class SeryogaEntity extends PathAwareEntity {
 			float yaw = (float) (MathHelper.atan2(dz, dx) * MathHelper.DEGREES_PER_RADIAN) - 90.0f;
 			setYaw(wrapDegrees(getYaw(), yaw, 90.0f));
 			float pace = (float) (speed * getAttributeValue(EntityAttributes.GENERIC_MOVEMENT_SPEED));
-			if (!isOnGround()) {
-				setMovementSpeed(pace);
-			} else if (groundTicks-- <= 0) {
-				groundTicks = 2 + random.nextInt(3);
-				setMovementSpeed(pace);
+			setMovementSpeed(pace);
+			if (isOnGround()) {
 				getJumpControl().setActive();
-			} else {
-				setMovementSpeed(0.0f);
 			}
 		}
 	}
