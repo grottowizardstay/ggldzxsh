@@ -1,6 +1,6 @@
 """Builds the Minecraft Java 1.20.1 world from build.py's commands using a real server.
 
-Usage: python make_world.py <server.jar> <workdir>
+Usage: python make_world.py <server.jar> <workdir> [world name]
 Needs java on PATH and the nbtlib package. Starting the server accepts the Minecraft EULA.
 """
 import gzip
@@ -16,7 +16,7 @@ from pathlib import Path
 
 import nbtlib
 
-NAME = "Muraveynik Gym"
+NAME = sys.argv[3] if len(sys.argv) > 3 else "Muraveynik Gym"
 jar, work = Path(sys.argv[1]).resolve(), Path(sys.argv[2]).resolve()
 srv = work / "srv"
 shutil.rmtree(srv, ignore_errors=True)
