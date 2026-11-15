@@ -1,0 +1,121 @@
+@font-face { font-family: "Montserrat"; font-weight: 500; font-display: swap; src: url("fonts/montserrat-latin-500-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: "Montserrat"; font-weight: 600; font-display: swap; src: url("fonts/montserrat-latin-600-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: "Montserrat"; font-weight: 800; font-display: swap; src: url("fonts/montserrat-latin-800-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: "Montserrat"; font-weight: 500; font-display: swap; src: url("fonts/montserrat-cyrillic-500-normal.woff2") format("woff2"); unicode-range: U+0400-04FF, U+2116; }
+@font-face { font-family: "Montserrat"; font-weight: 600; font-display: swap; src: url("fonts/montserrat-cyrillic-600-normal.woff2") format("woff2"); unicode-range: U+0400-04FF, U+2116; }
+@font-face { font-family: "Montserrat"; font-weight: 800; font-display: swap; src: url("fonts/montserrat-cyrillic-800-normal.woff2") format("woff2"); unicode-range: U+0400-04FF, U+2116; }
+
+.acap {
+  --acap-bg: #0f1014;
+  --acap-surface: #191a20;
+  --acap-line: #1f2027;
+  --acap-text: #f1f2f5;
+  --acap-muted: #6d707c;
+  --acap-accent: #ff2d46;
+  --acap-ok: #2bf04a;
+
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 352px;
+  padding: 14px 16px 12px;
+  background: var(--acap-bg);
+  border: 1px solid var(--acap-line);
+  border-radius: 14px;
+  color: var(--acap-text);
+  font: 500 13px/1.35 "Montserrat", "Segoe UI", system-ui, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.acap *, .acap *::before, .acap *::after { box-sizing: border-box; }
+
+.acap__head { display: flex; align-items: center; gap: 10px; }
+.acap__logo { width: 26px; height: 26px; flex: none; }
+.acap__name { font-weight: 800; font-size: 15px; letter-spacing: .02em; }
+.acap__name b { color: var(--acap-accent); font-weight: 800; }
+.acap__reload {
+  margin-left: auto;
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  background: none; border: 0; border-radius: 8px;
+  color: var(--acap-muted); cursor: pointer;
+  transition: color .15s, background .15s;
+}
+.acap__reload:hover { color: var(--acap-text); background: var(--acap-surface); }
+.acap__reload svg { width: 16px; height: 16px; }
+.acap[data-state="loading"] .acap__reload svg { animation: acap-spin .8s linear infinite; }
+
+.acap__prompt { margin: 12px 0 10px; font-size: 13px; }
+
+.acap__stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--acap-surface);
+  outline: 1px solid transparent;
+  transition: outline-color .2s;
+}
+.acap__bg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; opacity: 0; transition: opacity .25s; }
+.acap__piece {
+  position: absolute; display: block; pointer-events: none; opacity: 0;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, .65));
+  transition: opacity .25s;
+}
+.acap[data-state="ready"] .acap__bg, .acap[data-state="ready"] .acap__piece,
+.acap[data-state="checking"] .acap__bg, .acap[data-state="checking"] .acap__piece,
+.acap[data-state="success"] .acap__bg, .acap[data-state="success"] .acap__piece,
+.acap[data-state="fail"] .acap__bg, .acap[data-state="fail"] .acap__piece { opacity: 1; }
+
+/* HUD corner brackets */
+.acap__stage::before, .acap__stage::after {
+  content: ""; position: absolute; z-index: 2; width: 14px; height: 14px;
+  border: 2px solid rgba(255, 255, 255, .7); pointer-events: none;
+}
+.acap__stage::before { top: 8px; left: 8px; border-right: 0; border-bottom: 0; }
+.acap__stage::after { bottom: 8px; right: 8px; border-left: 0; border-top: 0; }
+
+.acap[data-state="loading"] .acap__stage {
+  background: linear-gradient(100deg, var(--acap-surface) 30%, #23252d 50%, var(--acap-surface) 70%) 0 0 / 200% 100%;
+  animation: acap-shimmer 1.1s linear infinite;
+}
+.acap[data-state="success"] .acap__stage { outline-color: var(--acap-ok); }
+.acap[data-state="success"] .acap__piece { filter: drop-shadow(0 0 7px var(--acap-ok)); }
+.acap[data-state="fail"] .acap__stage { outline-color: var(--acap-accent); animation: acap-shake .35s; }
+
+.acap__slider {
+  position: relative; height: 28px; margin-top: 10px;
+  cursor: grab; touch-action: none; outline: none;
+}
+.acap__slider:active { cursor: grabbing; }
+.acap__slider[aria-disabled="true"] { cursor: default; opacity: .6; }
+.acap__track, .acap__fill { position: absolute; left: 0; top: 11px; height: 6px; border-radius: 3px; }
+.acap__track { right: 0; background: var(--acap-surface); }
+.acap__fill { width: 0; background: var(--acap-accent); }
+.acap__thumb {
+  position: absolute; top: 6px; left: 0; width: 16px; height: 16px; margin-left: -8px;
+  border-radius: 50%; background: #fff;
+  box-shadow: 0 0 0 0 rgba(255, 45, 70, .35);
+  transition: box-shadow .15s;
+}
+.acap__slider:hover .acap__thumb, .acap__slider:focus-visible .acap__thumb { box-shadow: 0 0 0 6px rgba(255, 45, 70, .28); }
+.acap[data-state="success"] .acap__fill { background: var(--acap-ok); }
+.acap[data-state="success"] .acap__slider { opacity: 1; }
+
+.acap__foot {
+  display: flex; align-items: center; gap: 8px; margin-top: 8px; padding-top: 10px;
+  border-top: 1px solid var(--acap-line);
+  font-size: 11px; color: var(--acap-muted); white-space: nowrap;
+}
+.acap__status { display: flex; align-items: center; gap: 6px; font-weight: 800; text-transform: uppercase; color: var(--acap-muted); }
+.acap__status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.acap[data-state="success"] .acap__status { color: var(--acap-ok); }
+.acap[data-state="fail"] .acap__status, .acap[data-state="error"] .acap__status { color: var(--acap-accent); }
+.acap__meta { margin-left: auto; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+
+@keyframes acap-spin { to { transform: rotate(360deg); } }
+@keyframes acap-shimmer { to { background-position: -200% 0; } }
+@keyframes acap-shake { 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-3px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .acap *, .acap { animation: none !important; transition: none !important; }
+}

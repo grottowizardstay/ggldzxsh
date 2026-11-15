@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ACaptcha</title>
+  <link rel="stylesheet" href="acaptcha.css">
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: grid; place-items: center; padding: 24px; box-sizing: border-box;
+      background: #0a0b0e; color: #f1f2f5;
+      font: 500 14px/1.4 "Montserrat", "Segoe UI", system-ui, sans-serif;
+    }
+    .panel { width: 100%; max-width: 352px; }
+    .panel h1 { margin: 0 0 18px; font-size: 22px; font-weight: 800; letter-spacing: .02em; }
+    .row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .row label { flex: none; }
+    .row input {
+      flex: 1; min-width: 0; height: 32px; padding: 0 12px;
+      background: #191a20; border: 1px solid transparent; border-radius: 6px;
+      color: inherit; font: inherit; text-align: center; outline: none;
+    }
+    .row input:focus { border-color: #ff2d46; }
+    .submit {
+      width: 100%; height: 36px; margin-top: 14px;
+      background: #ff2d46; border: 0; border-radius: 6px;
+      color: #fff; font: inherit; font-weight: 600; cursor: pointer;
+      transition: opacity .15s, filter .15s;
+    }
+    .submit:hover:not(:disabled) { filter: brightness(1.1); }
+    .submit:disabled { background: #191a20; color: #6d707c; cursor: not-allowed; }
+    .result { min-height: 18px; margin-top: 12px; font-size: 12px; text-align: center; color: #6d707c; }
+    .result.ok { color: #2bf04a; }
+    .result.bad { color: #ff2d46; }
+  </style>
+</head>
+<body>
+  <form class="panel" id="demo">
+    <h1>Вход</h1>
+    <div class="row">
+      <label for="login">Логин:</label>
+      <input id="login" name="login" autocomplete="username" required>
+    </div>
+    <div data-acaptcha></div>
+    <button class="submit" type="submit" disabled>Войти</button>
+    <div class="result" role="status"></div>
+  </form>
+
+  <script src="acaptcha.js"></script>
+  <script>
+    const form = document.getElementById('demo');
+    const button = form.querySelector('.submit');
+    const result = form.querySelector('.result');
+
+    form.addEventListener('acaptcha:success', () => { button.disabled = false; });
+    form.addEventListener('acaptcha:reset', () => { button.disabled = true; });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      button.disabled = true;
+      const res = await fetch('/api/demo/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: form.elements['acaptcha-token'].value }),
+      });
+      const { success } = await res.json();
+      result.className = 'result ' + (success ? 'ok' : 'bad');
+      result.textContent = success ? 'Токен принят сервером' : 'Токен отклонён — пройдите проверку заново';
+    });
+  </script>
+</body>
+</html>
